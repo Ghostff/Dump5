@@ -10,9 +10,10 @@ class Controls
     const D_NULL    = '#6789f8';//default light blue
     const FLOT      = '#9c6e25';//default brown
     const PNT       = '#f00000';//default red
-	const NPNT      = '#e103c4';//default red
+	const NPNT      = '#e103c4';//default pink
     const INTE      = '#1baabb';//default greenishblue
-	const A_PT      = '#59829e';//default greenishblue
+	const A_PT      = '#59829e';//default light navy blue
+	const A_CT      = '#9d4451';//default light maroon
     
     private $marg = 20;
 	private $arr_count = null;
@@ -52,7 +53,8 @@ class Controls
 					$this->arr_count = count($args[$i], COUNT_RECURSIVE);
 				}
                 if (!$this->proc_end && $this->marg == 20) {
-                    $dumped .= '<code><b style="color:'. self::N_ARRAY .';">array</b> <i style="color:' .self::DATA_TY . ';">';
+                    $dumped .= '<code ><span style="color:'. self::A_CT . '">' . key($args[$i]) . '</span> ';
+					$dumped .= '<b style="color:'. self::N_ARRAY .';">array</b> <i style="color:' .self::DATA_TY . ';">';
                     $dumped .= '(size=' . $length . ')</i> [ </code><br />';
                 }
                 foreach ($args[$i] as $key => $values) {
