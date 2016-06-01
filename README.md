@@ -16,6 +16,8 @@ $country = array
   array("U" => array('Uganda', 'United States', 'United Kingdom', 'Ukraine')),
   );
 
+#Note this take 1 to infinit arguments
+#   $var->dump($m ... );
 
 echo $var->dump($m, 'Hey', 10, null, true, $country);
 
