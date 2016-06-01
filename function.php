@@ -65,7 +65,7 @@ class Controls
                         $dumped .= '<span style="color:'. self::A_PT . '">\'' . $key . '\'</span>';
                         $dumped .=  '</span> <span style="color:'. self::NPNT . '">=</span> ';
                         $dumped .= ' <b style="color:'. self::N_ARRAY .';">array</b>';
-                        $dumped .= ' <i style="color:' .self::DATA_TY . ';">(size = ' . $length . ')</i> { </code><br />';
+                        $dumped .= ' <i style="color:' .self::DATA_TY . ';">(size=' . $length . ')</i> { </code><br />';
                         $dumped .= $this->dump($values);
                         $dumped .= '<code style="margin-left:' .$this->marg. 'px;">}</code> <br />';
                         $this->marg -= 20;
