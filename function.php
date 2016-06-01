@@ -10,15 +10,15 @@ class Controls
     const D_NULL    = '#6789f8';//default light blue
     const FLOT      = '#9c6e25';//default brown
     const PNT       = '#f00000';//default red
-	const NPNT      = '#e103c4';//default pink
+    const NPNT      = '#e103c4';//default pink
     const INTE      = '#1baabb';//default greenishblue
-	const A_PT      = '#59829e';//default light navy blue
-	const A_CT      = '#9d4451';//default light maroon
+    const A_PT      = '#59829e';//default light navy blue
+    const A_CT      = '#9d4451';//default light maroon
     
     private $marg = 20;
-	private $arr_count = null;
-	private $detem_last = 1;
-	private $proc_end = false;
+    private $arr_count = null;
+    private $detem_last = 1;
+    private $proc_end = false;
     public function dump()
     {
         $numArgs = func_num_args();
@@ -41,7 +41,7 @@ class Controls
             }
             elseif ($data_type == 'boolean') {
                 $dumped .= '<code><span style="color:purple;">';
-				$dumped .= ($args[$i])? 'true</span>':'false</span>';
+                $dumped .= ($args[$i])? 'true</span>':'false</span>';
                 $dumped .= '<small style="color:' . self::DATA_N . ';"> boolean</small></code><br />';
             }
             elseif ($data_type == 'NULL') {
@@ -49,46 +49,46 @@ class Controls
             }
             elseif ($data_type == 'array') {
                 $length = count($args[$i]);
-				if (!$this->arr_count) {
-					$this->arr_count = count($args[$i], COUNT_RECURSIVE);
-				}
+                if (!$this->arr_count) {
+                    $this->arr_count = count($args[$i], COUNT_RECURSIVE);
+                }
                 if (!$this->proc_end && $this->marg == 20) {
                     $dumped .= '<code ><span style="color:'. self::A_CT . '">' . key($args[$i]) . '</span> ';
-					$dumped .= '<b style="color:'. self::N_ARRAY .';">array</b> <i style="color:' .self::DATA_TY . ';">';
+                    $dumped .= '<b style="color:'. self::N_ARRAY .';">array</b> <i style="color:' .self::DATA_TY . ';">';
                     $dumped .= '(size=' . $length . ')</i> [ </code><br />';
                 }
                 foreach ($args[$i] as $key => $values) {
                     if (is_array($values)) {
-						$this->marg += 20;
-						$length = count($values);
-						$dumped .= '<code style="margin-left:' .$this->marg. 'px;">';
-						$dumped .= '<span style="color:'. self::A_PT . '">\'' . $key . '\'</span>';
-						$dumped .=  '</span> <span style="color:'. self::NPNT . '">=</span> ';
-						$dumped .= ' <b style="color:'. self::N_ARRAY .';">array</b>';
-						$dumped .= ' <i style="color:' .self::DATA_TY . ';">(size = ' . $length . ')</i> { </code><br />';
-						$dumped .= $this->dump($values);
-						$dumped .= '<code style="margin-left:' .$this->marg. 'px;">}</code> <br />';
-						$this->marg -= 20;
+                        $this->marg += 20;
+                        $length = count($values);
+                        $dumped .= '<code style="margin-left:' .$this->marg. 'px;">';
+                        $dumped .= '<span style="color:'. self::A_PT . '">\'' . $key . '\'</span>';
+                        $dumped .=  '</span> <span style="color:'. self::NPNT . '">=</span> ';
+                        $dumped .= ' <b style="color:'. self::N_ARRAY .';">array</b>';
+                        $dumped .= ' <i style="color:' .self::DATA_TY . ';">(size = ' . $length . ')</i> { </code><br />';
+                        $dumped .= $this->dump($values);
+                        $dumped .= '<code style="margin-left:' .$this->marg. 'px;">}</code> <br />';
+                        $this->marg -= 20;
 
                     }
                     else{
                         $this->marg += 20;
-						$dumped .= '<code style="margin-left:' .$this->marg. 'px;"><span style="color:'. self::NAME . '">\'' . $key;
-						$dumped .= '\'</span> </span> <span style="color:'. self::PNT . '">=></span> </code>' . $this->dump($values);
-						$this->marg -= 20;
+                        $dumped .= '<code style="margin-left:' .$this->marg. 'px;"><span style="color:'. self::NAME . '">\'' . $key;
+                        $dumped .= '\'</span> </span> <span style="color:'. self::PNT . '">=></span> </code>' . $this->dump($values);
+                        $this->marg -= 20;
                     }
-					if ($this->marg == 20 && $this->arr_count == $this->detem_last) {
-						$dumped .= '<code>]<br /></code>';
-						$this->proc_end = false;
-						$this->arr_count = null;
-						$this->detem_last = 1;
-					}
-					else {
-						$this->proc_end = true;
-						$this->detem_last++;
-					}
+                    if ($this->marg == 20 && $this->arr_count == $this->detem_last) {
+                        $dumped .= '<code>]<br /></code>';
+                        $this->proc_end = false;
+                        $this->arr_count = null;
+                        $this->detem_last = 1;
+                    }
+                    else {
+                        $this->proc_end = true;
+                        $this->detem_last++;
+                    }
                 }
-				
+                
             }
         }
          return $dumped;
