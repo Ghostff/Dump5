@@ -23,7 +23,7 @@ class Controls
     {
         $args = func_get_args();
         $dumped = '';
-        for ($i = 0; $i < $args; $i++) {
+        for ($i = 0; $i < count($args); $i++) {
             $data_type = gettype($args[$i]);
             if ($data_type == 'string') {
                 $length = strlen($args[$i]);

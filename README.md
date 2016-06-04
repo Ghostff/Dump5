@@ -11,15 +11,20 @@ $m[] = $c;
 
 
 $country = array
-  (
-  array("N" => array('Nigeria', 'Namibia', 'Nauru', 'Nepal')),
-  array("U" => array('Uganda', 'United States', 'United Kingdom', 'Ukraine')),
-  );
+			(
+				array("N" => array('Nigeria', 'Namibia', 'Nauru', 'Nepal')),
+				array("U" => array('Uganda', 'United States', 'United Kingdom', 'Ukraine')),
+			);
+			
+			
+$yes = 'yes';
+$no = 'no';
 
 #Note this take 1 to infinit arguments
 #   $var->dump($m ... );
 
 echo $var->dump($m, 'Hey', 10, null, true, $country);
+echo $var->dump($yes == $no);
 
 ```
 The above code outputs
