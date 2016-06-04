@@ -18,5 +18,5 @@ $yes = 'yes';
 $no = 'no';
 
 
-echo $var->dump($m, 'Hey', 10, null, true, $country);
+echo $var->dump($m, 'Hey', 10, null, $country);
 echo $var->dump($yes == $no);
