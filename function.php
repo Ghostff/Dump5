@@ -1,5 +1,6 @@
 <?php
-class Controls
+
+class Dump
 {
     const NAME      = '#f07b06';//default orrange
     const VALUE     = '#0000ff';//default blue
@@ -19,11 +20,17 @@ class Controls
     private $arr_count = null;
     private $detem_last = 1;
     private $proc_end = false;
-    public function dump()
+    
+    public function __construct()
+    {
+        echo $this->dump(func_get_args());
+    }
+    private function dump()
     {
         $args = func_get_args();
         $dumped = '';
-        for ($i = 0; $i < count($args); $i++) {
+        for ($i = 0; $i < count($args); $i++) 
+        {
             $data_type = gettype($args[$i]);
             if ($data_type == 'string') {
                 $length = strlen($args[$i]);
@@ -52,8 +59,7 @@ class Controls
                     $this->arr_count = count($args[$i], COUNT_RECURSIVE);
                 }
                 if (!$this->proc_end && $this->marg == 20) {
-                    $dumped .= '<code ><span style="color:'. self::A_CT . '">' . key($args[$i]) . '</span> ';
-                    $dumped .= '<b style="color:'. self::N_ARRAY .';">array</b> <i style="color:' .self::DATA_TY . ';">';
+                    $dumped .= '<code><b style="color:' . self::N_ARRAY . ';">array</b> <i style="color:' .self::DATA_TY . ';">';
                     $dumped .= '(size=' . $length . ')</i> [ </code><br />';
                 }
                 foreach ($args[$i] as $key => $values) {
@@ -64,7 +70,7 @@ class Controls
                         $dumped .= '<span style="color:'. self::A_PT . '">\'' . $key . '\'</span>';
                         $dumped .=  '</span> <span style="color:'. self::NPNT . '">=</span> ';
                         $dumped .= ' <b style="color:'. self::N_ARRAY .';">array</b>';
-                        $dumped .= ' <i style="color:' .self::DATA_TY . ';">(size=' . $length . ')</i> { </code><br />';
+                        $dumped .= ' <i style="color:' .self::DATA_TY . ';">(size = ' . $length . ')</i> { </code><br />';
                         $dumped .= $this->dump($values);
                         $dumped .= '<code style="margin-left:' .$this->marg. 'px;">}</code> <br />';
                         $this->marg -= 20;

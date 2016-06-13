@@ -1,6 +1,5 @@
 <?php
 require 'function.php';
-$var = new Controls();
 
 $m = array('fname' => null, 'lname' => true);
 $c = array('class' => 'cosc', 'sch' => 'hccs', array('td' => array('m' => 8.5)));
@@ -18,5 +17,5 @@ $yes = 'yes';
 $no = 'no';
 
 
-echo $var->dump($m, 'Hey', 10, null, $country);
-echo $var->dump($yes == $no);
+new Dump($m, 'Hey', 10, null, $country);
+new Dump($yes == $no);
