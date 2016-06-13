@@ -21,7 +21,7 @@ $yes = 'yes';
 $no = 'no';
 
 #Note this take 1 to infinit arguments
-#   $var->dump($m ... );
+#   new Dump([mixed vars ... (not supporting objects yet)] );
 
 new Dump($m, 'Hey', 10, null, $country);
 new Dump($yes == $no);
