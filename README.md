@@ -23,8 +23,8 @@ $no = 'no';
 #Note this take 1 to infinit arguments
 #   $var->dump($m ... );
 
-echo $var->dump($m, 'Hey', 10, null, true, $country);
-echo $var->dump($yes == $no);
+new Dump($m, 'Hey', 10, null, $country);
+new Dump($yes == $no);
 
 ```
 The above code outputs

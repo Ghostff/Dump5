@@ -7,12 +7,12 @@ $m[] = $c;
 
 
 $country = array
-			(
-				array("N" => array('Nigeria', 'Namibia', 'Nauru', 'Nepal')),
-				array("U" => array('Uganda', 'United States', 'United Kingdom', 'Ukraine')),
-			);
-			
-			
+         (
+            array("N" => array('Nigeria', 'Namibia', 'Nauru', 'Nepal')),
+            array("U" => array('Uganda', 'United States', 'United Kingdom', 'Ukraine')),
+         );
+         
+         
 $yes = 'yes';
 $no = 'no';
 
