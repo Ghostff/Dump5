@@ -8,8 +8,8 @@ $m[] = $c;
 
 $country = array
          (
-            array("N" => array('Nigeria', 'Namibia', 'Nauru', 'Nepal')),
-            array("U" => array('Uganda', 'United States', 'United Kingdom', 'Ukraine')),
+		 	array("U" => array('United States', 'United Kingdom', 'Ukraine')),
+            array("N" => array('Namibia', 'Nauru', 'Nepal')), 
          );
          
          
