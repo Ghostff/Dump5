@@ -3,18 +3,19 @@
 class Dump
 {
     const NAME      = '#f07b06';//default orrange
-    const VALUE     = '#0000ff';//default blue
-    const DATA_N    = '#bbbbbb';//default gray
-    const DATA_TY   = '#5ba415';//default lemon
-    const N_ARRAY   = '#000000';//default black
-    const D_ARRAY   = '#b735e7';//default light purple
-    const D_NULL    = '#6789f8';//default light blue
-    const FLOT      = '#9c6e25';//default brown
-    const PNT       = '#f00000';//default red
-    const NPNT      = '#e103c4';//default pink
-    const INTE      = '#1baabb';//default greenishblue
-    const A_PT      = '#59829e';//default light navy blue
-    const A_CT      = '#9d4451';//default light maroon
+    const VALUE     = '#0000ff';//default blue (for string value)
+    const DATA_N    = '#bbbbbb';//default gray (for 'string')
+    const DATA_TY   = '#5ba415';//default lemon (for lenght or size)
+    const N_ARRAY   = '#000000';//default black (for array or objects)
+    const BOOL	    = '#bb02ff';//default light purple (for bool)
+    const D_NULL    = '#6789f8';//default light blue (for null)
+    const FLOT      = '#9c6e25';//default brown (for float)
+    const PNT       = '#f00000';//default red (for refrences like '=>' and ':')
+    const NPNT      = '#e103c4';//default pink (for '=')
+    const INTE      = '#1baabb';//default greenishblue (for int)
+    const A_PT      = '#59829e';//default light navy blue (for array key)
+	const VISIB     = '#741515';//default dark red (for object visibility)
+	const VAR_N     = '#987a00';//default light brown (for object variable name)
     
     private $marg = 20;
     private $arr_count = null;
@@ -26,6 +27,27 @@ class Dump
     {
         echo $this->dump(func_get_args());
     }
+	private function objects($object)
+	{
+		$vals = array();
+		$obj = new ReflectionObject($object);
+		$vals['class'] = $obj->getName();
+		foreach ($obj->getProperties() as $key =>  $prop) {
+			if ($prop->isPrivate()) {
+				$vals[$key]['visibility'] = 'private&nbsp;&nbsp;';
+			}
+			elseif ($prop->isProtected()) {
+				$vals[$key]['visibility'] = 'protected';
+			}
+			elseif ($prop->isPublic()) {
+				$vals[$key]['visibility'] = 'public&nbsp;&nbsp;&nbsp;';	
+			}
+			$getValue = $obj->getDefaultProperties();
+			$vals[$key]['name'] = $prop->getName();
+			$vals[$key]['value'] = $getValue[$prop->getName()];
+		}
+		return $vals;
+	}
     private function dump()
     {
         $args = func_get_args();
@@ -51,7 +73,7 @@ class Dump
                 $dumped .= '<small style="color:' . self::DATA_N . ';"> float</small></code><br />';
             }
             elseif ($data_type == 'boolean') {
-                $dumped .= '<code><span style="color:purple;">';
+                $dumped .= '<code><span style="color:' . self::BOOL . ';">';
                 $dumped .= ($args[$i])? 'true</span>':'false</span>';
                 $dumped .= '<small style="color:' . self::DATA_N . ';"> boolean</small></code><br />';
             }
@@ -65,7 +87,13 @@ class Dump
                 }
                 if (!$this->proc_end && $this->marg == 20) {
                     $dumped .= '<code><b style="color:' . self::N_ARRAY . ';">array</b> <i style="color:' .self::DATA_TY . ';">';
-                    $dumped .= '(size=' . $length . ')</i> [ </code><br />';
+                    $dumped .= '(size=' . $length . ')</i> [<br />';
+					if ($length == 0) {
+						$this->marg += 20;
+						$dumped .= '<code style="margin-left:' .$this->marg. 'px;">(empty)</code>';
+						$this->marg -= 20;
+						$dumped .= '<br /><code style="margin-left:' .$this->marg. 'px;">]</code> <br />';
+					}
                 }
                 foreach ($args[$i] as $key => $values) {
                     if (is_array($values)) {
@@ -87,7 +115,7 @@ class Dump
                         $this->marg -= 20;
                     }
                     if ($this->marg == 20 && $this->arr_count == $this->detem_last) {
-                        $dumped .= '<code>]<br /></code>';
+                        $dumped .= '<code style="margin-left:' .$this->marg. 'px;">]<br /></code>';
                         $this->proc_end = false;
                         $this->arr_count = null;
                         $this->detem_last = 1;
@@ -97,9 +125,32 @@ class Dump
                         $this->detem_last++;
                     }
                 }
-                
             }
+			elseif ($data_type == 'object') {
+				$object = $this->objects($args[$i]);
+				$dumped .= '<code><b style="color:' . self::N_ARRAY . ';">object</b> <i style="color:' .self::DATA_TY . ';">';
+				$dumped .= '(' . $object['class'] . ')</i><br />';
+                foreach ($object as $key => $values) {
+					if (is_array($values)) {
+						$dumped .= '<code style="margin-left:' .$this->marg. 'px;">';
+						$dumped .= '<span style="color:'. self::VISIB . '">' . $values['visibility'] . '</span>';
+						$dumped .= '</span> <span style="color:'. self::VAR_N . '">';
+						if (is_array($values['value'])) {
+							$dumped .= '\'' . $values['name'] . '\' </span>';
+							$dumped .= '<span style="color:'. self::PNT . '"> : </span>';
+							$dumped .= $this->dump($values['value']);
+						}
+						else {
+							$dumped .= '\'' . $values['name'] . '\' </span>';
+							$dumped .= '<span style="color:'. self::PNT . '"> : </span>';
+							$dumped .= $this->dump($values['value']);
+						}
+					}
+                }
+			}
         }
          return $dumped;
     }
+	
+
 }

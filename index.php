@@ -16,6 +16,13 @@ $country = array
 $yes = 'yes';
 $no = 'no';
 
+class StdClass
+{
+	private $g = 'string';
+	protected $r = 10;
+	public $e = array('m', 'n');
+	protected $f = false;
+}
 
-new Dump($m, 'Hey', 10, null, $country);
-new Dump($yes == $no);
+
+new Dump(new StdClass, $m, 'Hey', 10, null, $country);
