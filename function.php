@@ -62,8 +62,9 @@ class Dump
             $data_type = gettype($args[$i]);
             if ($data_type == 'string') {
                 $length = strlen($args[$i]);
-                $dumped .= '<code><span style="color:' . self::VALUE . ';">\'' . $args[$i] . '\'</span> <i style="color:' .self::DATA_TY;
-                $dumped .= ';">(length=' . $length . ')</i> <small style="color:' . self::DATA_N . ';"> string</small></code><br />';
+                $dumped .= '<code><span style="color:' . self::VALUE . ';">\'' . $args[$i];
+				$dumped .= '\'</span> <i style="color:' .self::DATA_TY . ';">(length=' . $length . ')</i>';
+                $dumped .= '<small style="color:' . self::DATA_N . ';"> string</small></code><br />';
             }
             elseif ($data_type == 'integer') {
                 $dumped .= '<code><span style="color:' . self::INTE . ';">' . $args[$i] . '</span>';
@@ -87,8 +88,8 @@ class Dump
                     $this->arr_count = count($args[$i], COUNT_RECURSIVE);
                 }
                 if (!$this->proc_end && $this->marg == 20) {
-                    $dumped .= '<code><b style="color:' . self::N_ARRAY . ';">array</b> <i style="color:' .self::DATA_TY . ';">';
-                    $dumped .= '(size=' . $length . ')</i> [<br />';
+                    $dumped .= '<code><b style="color:' . self::N_ARRAY . ';">array</b> ';
+                    $dumped .= '<i style="color:' .self::DATA_TY . ';">(size=' . $length . ')</i> [<br />';
                     if ($length == 0) {
                         $this->marg += 20;
                         $dumped .= '<code style="margin-left:' .$this->marg. 'px;">(empty)</code>';
@@ -104,15 +105,17 @@ class Dump
                         $dumped .= '<span style="color:'. self::A_PT . '">\'' . $key . '\'</span>';
                         $dumped .=  '</span> <span style="color:'. self::NPNT . '">=</span> ';
                         $dumped .= ' <b style="color:'. self::N_ARRAY .';">array</b>';
-                        $dumped .= ' <i style="color:' .self::DATA_TY . ';">(size = ' . $length . ')</i> { </code><br />';
-                        $dumped .= $this->dump($values);
+                        $dumped .= ' <i style="color:' .self::DATA_TY . ';">(size = ' . $length . ')';
+                        $dumped .= '</i> { </code><br />' . $this->dump($values);
                         $dumped .= '<code style="margin-left:' .$this->marg. 'px;">}</code> <br />';
                         $this->marg -= 20;
                     }
                     else{
                         $this->marg += 20;
-                        $dumped .= '<code style="margin-left:' .$this->marg. 'px;"><span style="color:'. self::NAME . '">\'' . $key;
-                        $dumped .= '\'</span> </span> <span style="color:'. self::PNT . '">=></span> </code>' . $this->dump($values);
+                        $dumped .= '<code style="margin-left:' .$this->marg. 'px;">';
+						$dumped .= '<span style="color:'. self::NAME . '">\'' . $key;
+                        $dumped .= '\'</span> </span> <span style="color:'. self::PNT . '">=>';
+						$dumped .= '</span> </code>' . $this->dump($values);
                         $this->marg -= 20;
                     }
                     if ($this->marg == 20 && $this->arr_count == $this->detem_last) {
@@ -129,7 +132,8 @@ class Dump
             }
             elseif ($data_type == 'object') {
                 $object = $this->objects($args[$i]);
-                $dumped .= '<code><b style="color:' . self::N_ARRAY . ';">object</b> <i style="color:' .self::DATA_TY . ';">';
+                $dumped .= '<code><b style="color:' . self::N_ARRAY . ';">';
+				$dumped .= 'object</b> <i style="color:' .self::DATA_TY . ';">';
                 $dumped .= '(' . $object['class'] . ')</i><br />';
                 foreach ($object as $key => $values) {
                     if (is_array($values)) {
