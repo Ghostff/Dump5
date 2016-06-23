@@ -20,6 +20,7 @@ class Dump
     private $arr_count = null;
     private $detem_last = 1;
     private $proc_end = false;
+	private $instance = true;
     
     public function __construct()
     {
@@ -28,6 +29,10 @@ class Dump
     private function dump()
     {
         $args = func_get_args();
+		if ($this->instance) {
+			$args = $args[0];
+			$this->instance = false;
+		}
         $dumped = '';
         for ($i = 0; $i < count($args); $i++) 
         {
@@ -74,7 +79,6 @@ class Dump
                         $dumped .= $this->dump($values);
                         $dumped .= '<code style="margin-left:' .$this->marg. 'px;">}</code> <br />';
                         $this->marg -= 20;
-
                     }
                     else{
                         $this->marg += 20;
