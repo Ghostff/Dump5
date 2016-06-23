@@ -16,7 +16,7 @@ $country = array
 $yes = 'yes';
 $no = 'no';
 
-class StdClass
+class Test
 {
 	private $g = 'string';
 	protected $r = 10;
@@ -25,4 +25,4 @@ class StdClass
 }
 
 
-new Dump(new StdClass, $m, 'Hey', 10, null, $country);
+new Dump(new Test, $m, 'Hey', 10, null, $country);
