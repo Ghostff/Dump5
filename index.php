@@ -6,11 +6,7 @@ $c = array('class' => 'cosc', 'sch' => 'hccs', array('td' => array('m' => 8.5)))
 $m[] = $c;
 
 
-$country = array
-         (
-		 	array("U" => array('United States', 'United Kingdom', 'Ukraine')),
-            array("N" => array('Namibia', 'Nauru', 'Nepal')), 
-         );
+$country = array (array("U" => array('United States', 'United Kingdom', 'Ukraine')));
          
          
 $yes = 'yes';
@@ -26,3 +22,4 @@ class Test
 
 
 new Dump(new Test, $m, 'Hey', 10, null, $country);
+new Dump($yes == $no);

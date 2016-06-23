@@ -11,18 +11,25 @@ $m[] = $c;
 
 $country = array
 			(
-				array("U" => array('United States', 'United Kingdom', 'Ukraine')),
-                array("N" => array('Namibia', 'Nauru', 'Nepal')), 
+				array("U" => array('United States', 'United Kingdom', 'Ukraine'))
 			);
 			
 			
 $yes = 'yes';
 $no = 'no';
 
+class Test
+{
+    private $g = 'string';
+    protected $r = 10;
+    public $e = array('m', 'n');
+    protected $f = false;
+}
+
 #Note this take 1 to infinit arguments
 #   new Dump([mixed vars ... (not supporting objects yet)] );
 
-new Dump($m, 'Hey', 10, null, $country);
+new Dump(new Test, $m, 'Hey', 10, null, $country);
 new Dump($yes == $no);
 
 ```
