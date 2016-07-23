@@ -9,10 +9,9 @@ $c = array('class' => 'cosc', 'sch' => 'hccs', array('td' => array('m' => 8.5)))
 $m[] = $c;
 
 
-$country = array
-			(
-				array("U" => array('United States', 'United Kingdom', 'Ukraine'))
-			);
+$country = array(
+		array("U" => array('United States', 'United Kingdom', 'Ukraine'))
+		);
 			
 			
 $yes = 'yes';
