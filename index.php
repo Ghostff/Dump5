@@ -1,5 +1,5 @@
 <?php
-require 'function.php';
+require 'Dump.php';
 
 $m = array('fname' => null, 'lname' => true);
 $c = array('class' => 'cosc', 'sch' => 'hccs', array('td' => array('m' => 8.5)));
