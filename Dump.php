@@ -16,6 +16,7 @@ class Dump
     const A_PT      = '#59829e';//default light navy blue (for array key)
     const VISIB     = '#741515';//default dark red (for object visibility)
     const VAR_N     = '#987a00';//default light brown (for object variable name)
+	const STAT		= '#3465A4';//default dark navy blue (for static property name)
     
     private $marg = 20;
     private $arr_count = null;
@@ -25,62 +26,83 @@ class Dump
     
     public function __construct()
     {
-        echo $this->dump(func_get_args());
+        echo $this->logic(func_get_args());
     }
-    private function objects($object)
+	
+    private function objects($object, &$indent)
     {
         $vals = array();
         $obj = new ReflectionObject($object);
+		
         $vals['class'] = $obj->getName();
         foreach ($obj->getProperties() as $key =>  $prop) {
             //the &nbsp; is to make sure visibilities are aligned
             if ($prop->isPrivate()) {
-                $vals[$key]['visibility'] = 'private&nbsp;&nbsp;';
+				$type = 'private ~~ &nbsp;&nbsp;&nbsp;';
+				if ($prop->isStatic()) {
+					$type = 'private <i style="color:' . Dump::STAT . ';">
+							 static</i>&nbsp;&nbsp;&nbsp;';
+					$indent = true;
+				}
             }
             elseif ($prop->isProtected()) {
-                $vals[$key]['visibility'] = 'protected';
+				$type = 'protected ~~ &nbsp;';
+				if ($prop->isStatic()) {
+					$type = 'protected <i style="color:' . Dump::STAT . ';">
+							 static</i>&nbsp;';
+					$indent = true;
+				}
+                
             }
             elseif ($prop->isPublic()) {
-                $vals[$key]['visibility'] = 'public&nbsp;&nbsp;&nbsp;';    
+				$type = 'public ~~ &nbsp;&nbsp;&nbsp;&nbsp;';
+				if ($prop->isStatic()) {
+					$type = 'public <i style="color:' . Dump::STAT . ';">
+							 static</i>&nbsp;&nbsp;&nbsp;&nbsp;';
+					$indent = true;
+				}  
             }
-            $getValue = $obj->getDefaultProperties();
+			$vals[$key]['visibility'] = $type;
+			$prop->setAccessible(true);
             $vals[$key]['name'] = $prop->getName();
-            $vals[$key]['value'] = $getValue[$prop->getName()];
+			$vals[$key]['value'] = $prop->getValue($object);
         }
         return $vals;
     }
-    private function dump()
+	
+    private function logic()
     {
         $args = func_get_args();
         if ($this->instance) {
             $args = $args[0];
             $this->instance = false;
         }
+		
         $dumped = '';
         for ($i = 0; $i < count($args); $i++) 
         {
             $data_type = gettype($args[$i]);
             if ($data_type == 'string') {
                 $length = strlen($args[$i]);
-                $dumped .= '<code><span style="color:' . self::VALUE . ';">\'' . $args[$i];
-                $dumped .= '\'</span> <i style="color:' .self::DATA_TY . ';">(length=' . $length . ')</i>';
-                $dumped .= '<small style="color:' . self::DATA_N . ';"> string</small></code><br />';
+                $dumped .= '<code><span style="color:' . Dump::VALUE . ';">\'' . $args[$i];
+                $dumped .= '\'</span> <i style="color:' .Dump::DATA_TY . ';">(length=' . $length . ')</i>';
+                $dumped .= '<small style="color:' . Dump::DATA_N . ';"> string</small></code><br />';
             }
             elseif ($data_type == 'integer') {
-                $dumped .= '<code><span style="color:' . self::INTE . ';">' . $args[$i] . '</span>';
-                $dumped .= ' <small style="color:' . self::DATA_N . ';"> int</small></code><br />';
+                $dumped .= '<code><span style="color:' . Dump::INTE . ';">' . $args[$i] . '</span>';
+                $dumped .= ' <small style="color:' . Dump::DATA_N . ';"> int</small></code><br />';
             }
             elseif ($data_type == 'double') {
-                $dumped .= '<code><span style="color:' . self::FLOT . ';">' . $args[$i] . '</span>';
-                $dumped .= '<small style="color:' . self::DATA_N . ';"> float</small></code><br />';
+                $dumped .= '<code><span style="color:' . Dump::FLOT . ';">' . $args[$i] . '</span>';
+                $dumped .= '<small style="color:' . Dump::DATA_N . ';"> float</small></code><br />';
             }
             elseif ($data_type == 'boolean') {
-                $dumped .= '<code><span style="color:' . self::BOOL . ';">';
+                $dumped .= '<code><span style="color:' . Dump::BOOL . ';">';
                 $dumped .= ($args[$i])? 'true</span>':'false</span>';
-                $dumped .= '<small style="color:' . self::DATA_N . ';"> boolean</small></code><br />';
+                $dumped .= '<small style="color:' . Dump::DATA_N . ';"> boolean</small></code><br />';
             }
             elseif ($data_type == 'NULL') {
-                $dumped .= '<code><span style="color:' . self::D_NULL . ';">null</span></code><br />';
+                $dumped .= '<code><span style="color:' . Dump::D_NULL . ';">null</span></code><br />';
             }
             elseif ($data_type == 'array') {
                 $length = count($args[$i]);
@@ -88,8 +110,8 @@ class Dump
                     $this->arr_count = count($args[$i], COUNT_RECURSIVE);
                 }
                 if (!$this->proc_end && $this->marg == 20) {
-                    $dumped .= '<code><b style="color:' . self::N_ARRAY . ';">array</b> ';
-                    $dumped .= '<i style="color:' .self::DATA_TY . ';">(size=' . $length . ')</i> [<br />';
+                    $dumped .= '<code><b style="color:' . Dump::N_ARRAY . ';">array</b> ';
+                    $dumped .= '<i style="color:' .Dump::DATA_TY . ';">(size=' . $length . ')</i> [<br />';
                     if ($length == 0) {
                         $this->marg += 20;
                         $dumped .= '<code style="margin-left:' .$this->marg. 'px;">(empty)</code>';
@@ -102,20 +124,20 @@ class Dump
                         $this->marg += 20;
                         $length = count($values);
                         $dumped .= '<code style="margin-left:' .$this->marg. 'px;">';
-                        $dumped .= '<span style="color:'. self::A_PT . '">\'' . $key . '\'</span>';
-                        $dumped .=  '</span> <span style="color:'. self::NPNT . '">=</span> ';
-                        $dumped .= ' <b style="color:'. self::N_ARRAY .';">array</b>';
-                        $dumped .= ' <i style="color:' .self::DATA_TY . ';">(size = ' . $length . ')';
-                        $dumped .= '</i> { </code><br />' . $this->dump($values);
+                        $dumped .= '<span style="color:'. Dump::A_PT . '">\'' . $key . '\'</span>';
+                        $dumped .=  '</span> <span style="color:'. Dump::NPNT . '">=</span> ';
+                        $dumped .= ' <b style="color:'. Dump::N_ARRAY .';">array</b>';
+                        $dumped .= ' <i style="color:' .Dump::DATA_TY . ';">(size = ' . $length . ')';
+                        $dumped .= '</i> { </code><br />' . $this->logic($values);
                         $dumped .= '<code style="margin-left:' .$this->marg. 'px;">}</code> <br />';
                         $this->marg -= 20;
                     }
                     else{
                         $this->marg += 20;
                         $dumped .= '<code style="margin-left:' .$this->marg. 'px;">';
-                        $dumped .= '<span style="color:'. self::NAME . '">\'' . $key;
-                        $dumped .= '\'</span> </span> <span style="color:'. self::PNT . '">=>';
-                        $dumped .= '</span> </code>' . $this->dump($values);
+                        $dumped .= '<span style="color:'. Dump::NAME . '">\'' . $key;
+                        $dumped .= '\'</span> </span> <span style="color:'. Dump::PNT . '">=>';
+                        $dumped .= '</span> </code>' . $this->logic($values);
                         $this->marg -= 20;
                     }
                     if ($this->marg == 20 && $this->arr_count == $this->detem_last) {
@@ -131,27 +153,51 @@ class Dump
                 }
             }
             elseif ($data_type == 'object') {
-                $object = $this->objects($args[$i]);
-                $dumped .= '<code><b style="color:' . self::N_ARRAY . ';">';
-                $dumped .= 'object</b> <i style="color:' .self::DATA_TY . ';">';
+				$indent = false;
+                $object = $this->objects($args[$i], $indent);
+				
+                $dumped .= '<code><b style="color:' . Dump::N_ARRAY . ';">';
+                $dumped .= 'object</b> <i style="color:' .Dump::DATA_TY . ';">';
                 $dumped .= '(' . $object['class'] . ')</i><br />';
+				$this->marg += 20;
                 foreach ($object as $key => $values) {
+					
+					//match object property indentation
+					if ($indent && isset($values['visibility'])) {
+						$values['visibility'] = str_replace(
+							'~~',
+							str_repeat('&emsp;', 3),
+							$values['visibility']
+						);
+					} else {
+						if (isset($values['visibility'])) {
+								$values['visibility'] = str_replace(
+									'~~','&nbsp;', $values['visibility']
+								);
+						}
+					}
+					
                     if (is_array($values)) {
                         $dumped .= '<code style="margin-left:' .$this->marg. 'px;">';
-                        $dumped .= '<span style="color:'. self::VISIB . '">' . $values['visibility'] . '</span>';
-                        $dumped .= '</span> <span style="color:'. self::VAR_N . '">';
+                        $dumped .= '<span style="color:'. Dump::VISIB . '">' . $values['visibility'] . '</span>';
+                        $dumped .= '</span> <span style="color:'. Dump::VAR_N . '">';
+						
                         if (is_array($values['value'])) {
                             $dumped .= '\'' . $values['name'] . '\' </span>';
-                            $dumped .= '<span style="color:'. self::PNT . '"> : </span>';
-                            $dumped .= $this->dump($values['value']);
+                            $dumped .= '<span style="color:'. Dump::PNT . '"> : </span>';
+                            $dumped .= $this->logic($values['value']);
                         }
                         else {
+							
                             $dumped .= '\'' . $values['name'] . '\' </span>';
-                            $dumped .= '<span style="color:'. self::PNT . '"> : </span>';
-                            $dumped .= $this->dump($values['value']);
+                            $dumped .= '<span style="color:'. Dump::PNT . '"> : </span>';
+                            $dumped .= $this->logic($values['value']);
                         }
+						
                     }
                 }
+				$dumped .= '<br />';
+				$this->marg -= 20;
             }
         }
          return $dumped;
