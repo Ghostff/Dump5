@@ -16,7 +16,7 @@ class Dump
     const A_PT      = '#59829e';//default light navy blue (for array key)
     const VISIB     = '#741515';//default dark red (for object visibility)
     const VAR_N     = '#987a00';//default light brown (for object variable name)
-	const STAT		= '#3465A4';//default dark navy blue (for static property name)
+    const STAT        = '#3465A4';//default dark navy blue (for static property name)
     
     private $marg = 20;
     private $arr_count = null;
@@ -28,48 +28,48 @@ class Dump
     {
         echo $this->logic(func_get_args());
     }
-	
+    
     private function objects($object, &$indent)
     {
         $vals = array();
         $obj = new ReflectionObject($object);
-		
+        
         $vals['class'] = $obj->getName();
         foreach ($obj->getProperties() as $key =>  $prop) {
             //the &nbsp; is to make sure visibilities are aligned
             if ($prop->isPrivate()) {
-				$type = 'private ~~ &nbsp;&nbsp;&nbsp;';
-				if ($prop->isStatic()) {
-					$type = 'private <i style="color:' . Dump::STAT . ';">
-							 static</i>&nbsp;&nbsp;&nbsp;';
-					$indent = true;
-				}
+                $type = 'private ~~ &nbsp;&nbsp;&nbsp;';
+                if ($prop->isStatic()) {
+                    $type = 'private <i style="color:' . Dump::STAT . ';">
+                             static</i>&nbsp;&nbsp;&nbsp;';
+                    $indent = true;
+                }
             }
             elseif ($prop->isProtected()) {
-				$type = 'protected ~~ &nbsp;';
-				if ($prop->isStatic()) {
-					$type = 'protected <i style="color:' . Dump::STAT . ';">
-							 static</i>&nbsp;';
-					$indent = true;
-				}
+                $type = 'protected ~~ &nbsp;';
+                if ($prop->isStatic()) {
+                    $type = 'protected <i style="color:' . Dump::STAT . ';">
+                             static</i>&nbsp;';
+                    $indent = true;
+                }
                 
             }
             elseif ($prop->isPublic()) {
-				$type = 'public ~~ &nbsp;&nbsp;&nbsp;&nbsp;';
-				if ($prop->isStatic()) {
-					$type = 'public <i style="color:' . Dump::STAT . ';">
-							 static</i>&nbsp;&nbsp;&nbsp;&nbsp;';
-					$indent = true;
-				}  
+                $type = 'public ~~ &nbsp;&nbsp;&nbsp;&nbsp;';
+                if ($prop->isStatic()) {
+                    $type = 'public <i style="color:' . Dump::STAT . ';">
+                             static</i>&nbsp;&nbsp;&nbsp;&nbsp;';
+                    $indent = true;
+                }  
             }
-			$vals[$key]['visibility'] = $type;
-			$prop->setAccessible(true);
+            $vals[$key]['visibility'] = $type;
+            $prop->setAccessible(true);
             $vals[$key]['name'] = $prop->getName();
-			$vals[$key]['value'] = $prop->getValue($object);
+            $vals[$key]['value'] = $prop->getValue($object);
         }
         return $vals;
     }
-	
+    
     private function logic()
     {
         $args = func_get_args();
@@ -77,7 +77,7 @@ class Dump
             $args = $args[0];
             $this->instance = false;
         }
-		
+        
         $dumped = '';
         for ($i = 0; $i < count($args); $i++) 
         {
@@ -153,51 +153,65 @@ class Dump
                 }
             }
             elseif ($data_type == 'object') {
-				$indent = false;
+                $indent = false;
                 $object = $this->objects($args[$i], $indent);
-				
+                
                 $dumped .= '<code><b style="color:' . Dump::N_ARRAY . ';">';
                 $dumped .= 'object</b> <i style="color:' .Dump::DATA_TY . ';">';
                 $dumped .= '(' . $object['class'] . ')</i><br />';
-				$this->marg += 20;
+                $this->marg += 20;
                 foreach ($object as $key => $values) {
-					
-					//match object property indentation
-					if ($indent && isset($values['visibility'])) {
-						$values['visibility'] = str_replace(
-							'~~',
-							str_repeat('&emsp;', 3),
-							$values['visibility']
-						);
-					} else {
-						if (isset($values['visibility'])) {
-								$values['visibility'] = str_replace(
-									'~~','&nbsp;', $values['visibility']
-								);
-						}
-					}
-					
+                    
+                    //match object property indentation
+                    if ($indent && isset($values['visibility'])) {
+                        $values['visibility'] = str_replace(
+                            '~~',
+                            str_repeat('&emsp;', 3),
+                            $values['visibility']
+                        );
+                    } else {
+                        if (isset($values['visibility'])) {
+                                $values['visibility'] = str_replace(
+                                    '~~','&nbsp;', $values['visibility']
+                                );
+                        }
+                    }
+                    
                     if (is_array($values)) {
                         $dumped .= '<code style="margin-left:' .$this->marg. 'px;">';
                         $dumped .= '<span style="color:'. Dump::VISIB . '">' . $values['visibility'] . '</span>';
                         $dumped .= '</span> <span style="color:'. Dump::VAR_N . '">';
-						
+                        
                         if (is_array($values['value'])) {
+                            $current_marg = $this->marg + 30;
+                            $length= count($values['value']);
                             $dumped .= '\'' . $values['name'] . '\' </span>';
-                            $dumped .= '<span style="color:'. Dump::PNT . '"> : </span>';
-                            $dumped .= $this->logic($values['value']);
+                            $dumped .= '<span style="color:'. Dump::PNT . '"> : </span><br />';
+                            $dumped .= '<code style="margin-left:' .$current_marg. 'px;">';
+                            $dumped .= '<b style="color:' . Dump::N_ARRAY . ';">array</b> ';
+                            $dumped .= '<i style="color:' .Dump::DATA_TY . ';">(size=' . $length . ')</i> [<br />';
+                            
+                            $this->marg += 30;
+                            if ($length == 0) {
+                                $merg = $current_marg+20;
+                                $dumped .= '<code style="margin-left:' .$merg. 'px;">(empty)</code><br />';
+                               } else {
+                                $dumped .= $this->logic($values['value']);
+                            }
+                            $this->marg -= 30;
+                            $dumped .= '</code><code style="margin-left:' .$current_marg. 'px;">';
+                            $dumped .= ']<br />';
                         }
                         else {
-							
                             $dumped .= '\'' . $values['name'] . '\' </span>';
                             $dumped .= '<span style="color:'. Dump::PNT . '"> : </span>';
                             $dumped .= $this->logic($values['value']);
                         }
-						
+                        
                     }
                 }
-				$dumped .= '<br />';
-				$this->marg -= 20;
+                $dumped .= '<br />';
+                $this->marg -= 20;
             }
         }
          return $dumped;
