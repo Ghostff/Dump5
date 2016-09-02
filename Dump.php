@@ -32,7 +32,7 @@ class Dump
     private function objects($object, &$indent)
     {
         $vals = array();
-        $obj = new ReflectionObject($object);
+        $obj = new \ReflectionObject($object);
         
         $vals['class'] = $obj->getName();
         foreach ($obj->getProperties() as $key =>  $prop) {
