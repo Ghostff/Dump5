@@ -16,7 +16,7 @@ class Dump
     const A_PT      = '#59829e';//default light navy blue (for array key)
     const VISIB     = '#741515';//default dark red (for object visibility)
     const VAR_N     = '#987a00';//default light brown (for object variable name)
-    const STAT        = '#3465A4';//default dark navy blue (for static property name)
+    const STAT      = '#3465A4';//default dark navy blue (for static property name)
     
     private $marg = 20;
     private $arr_count = null;
