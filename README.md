@@ -2,7 +2,7 @@
 A pretty version of php var_dump
 
 ```php
-require 'src/Dump.php';
+require 'src/PHP5.3/Dump.php';
 
 $m = array(
 	'fname' => null,
