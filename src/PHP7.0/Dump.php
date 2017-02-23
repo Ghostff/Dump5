@@ -1,199 +1,272 @@
 <?php
 
+/**
+ * Bittr
+ *
+ * @license
+ *
+ * New BSD License
+ *
+ * Copyright © 2007-2017, Hoa community. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Hoa nor the names of its contributors may be
+ *       used to endorse or promote products derived from this software without
+ *       specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS AND CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
 class Dump
 {
+    /**
+     * @var string
+     */
+    private $_null = '6789f8';
+    /**
+     * @var string
+     */
     private $_type = 'AAAAAA';
+    /**
+     * @var string
+     */
+    private $_bool = 'bb02ff';
+    /**
+     * @var string
+     */
     private $_array	= '000000';
+    /**
+     * @var string
+     */
     private $_float = '9C6E25';
+    /**
+     * @var string
+     */
     private $_double = '9C6E25';
+    /**
+     * @var string
+     */
     private $_string = '0000FF';
-    private $_length = '5BA415';
+    /**
+     * @var string
+     */
+    private $_lenght = '5BA415';
+    /**
+     * @var string
+     */
     private $_integer = '1BAABB';
+    /**
+     * @var string
+     */
     private $_object = '000000';
-    private $_visibility = '741515';
+    /**
+     * @var string
+     */
+    private $_vsble = '741515';
+    /**
+     * @var string
+     */
     private $_object_name = '5ba415';
-    private $_single_arr_key = 'f07b06';
+    /**
+     * @var string
+     */
     private $_obj_prop_name = '987a00';
-    private $_double_arr_key = '59829e';
-    private $_single_arr_accessor = 'F00000';
-    private $_double_arr_accessor = 'e103c4';
-    private $_obj_prop_accessor = 'F00000';
+    /**
+     * @var string
+     */
+    private $_obj_prop_acc = 'f00000';
+    /**
+     * @var string
+     */
+    private $_parent_arr = 'f07b06';
+    /**
+     * @var string
+     */
+    private $_parant_arr_acc = 'e103c4';
+    /**
+     * @var string
+     */
+    private $_child_arr = 'f07b06';
+    /**
+     * @var string
+     */
+    private $_child_arr_acc = 'f00000';
 
-    private $_room_name = 'PARRENT_\ARRAY_\CONTENTS_\GOES_\HERE_';
-    private $tag = 'code';
-
-
+    /**
+     * Dump constructor.
+     */
     public function __construct()
     {
-        echo $this->format(func_get_args());
+        echo  '<code>' . $this->format(func_get_args()) . '</code>';
     }
 
-    private function span(string $content, string $color, string $class, string $optional = null): string
-    {
-        $format = '<span class="%s" style="color:#%s;%s">%s</span>';
-        return sprintf($format, $class, $color, $optional, $content);
-    }
-
-    private function length(int $lenght): string
-    {
-        $lenght = '(length=' . $lenght . ')';
-        return $this->span($lenght, $this->_lenght, 'length');
-    }
-
-    private function type(string $type): string
-    {
-        return $this->span($type, $this->_type, 'type', 'font-size:10px;margin-left:10px;');
-    }
-
-    private function array_parent(int $size = 0, int $type = 0): string
-    {
-        $tag = ($type == 0) ? ['[', ']'] : ['{', '}'];
-
-        $_array = $this->span('array', $this->_array, 'array', 'font-weight:bold;margin-right:5px;');
-        $_array .= $this->length($size);
-        $_array .= $this->span($tag[0], $this->_array, 'array', $type == 0 ? 'font-weight:bold;' : '');
-
-        if ($size == 0)
-        {
-            $_array .= '<br />';
-        }
-        for ($i = 0; $i < $size; $i++)
-        {
-            $counter = $this->_room_name . $i;
-            $_array .= sprintf('<div style="padding-left:20px;"/>%s</div>', $counter);
-        }
-
-        $_array .= $this->span($tag[1], $this->_array, 'array', $type == 0 ? 'font-weight:bold;' : '');
-        return $_array;
-    }
-
-    private function array_key(string $key, int $type = 0): string
-    {
-        $_array = '';
-        if ($type == 0)
-        {
-            $_array .= $this->span("'$key'", $this->_single_arr_key, 'single_arr_key');
-            $_array .= $this->span(' => ', $this->_single_arr_accessor, 'single_arr_accessor');
-        }
-        else
-        {
-            $_array .= $this->span("'$key'", $this->_double_arr_key, 'double_arr_key');
-            $_array .= $this->span(' = ', $this->_double_arr_accessor, 'double_arr_accessor');
-        }
-        return $_array;
-    }
-
+    /**
+     * object argument format
+     *
+     * @param $objects
+     * @return string
+     */
     private function objects($objects): string
     {
         $obj = new \ReflectionObject($objects);
-        $temp = $this->span('object', $this->_object, 'object', 'font-weight:bold;');
 
-        $properties = '<div style="padding-left:20px;" class="obj_prop">';
+        $temp = '<span class="object" style="font-weight:bold;color:#' . $this->_object . '">object</span>';
+        $format = '<div style="padding-left:20px;" class="obj_prop">';
+
         foreach ($obj->getProperties() as $size => $prop)
         {
             if ($prop->isPrivate())
             {
-                $properties .=  $this->span('private&nbsp;&nbsp; ', $this->_visibility, 'private');
+                $format .= '<span class="private" style="color:#' . $this->_vsble . '">private&nbsp;&nbsp; </span>';
             }
             elseif ($prop->isProtected())
             {
-                $properties .=  $this->span('protected ', $this->_visibility, 'protected');
+                $format .= '<span class="protected" style="color:#' . $this->_vsble . '">protected </span>';
             }
             elseif ($prop->isPublic())
             {
-                $properties .=  $this->span('public&nbsp;&nbsp;&nbsp; ', $this->_visibility, 'public');
+                $format .= '<span class="public" style="color:#' . $this->_vsble . '">public&nbsp;&nbsp;&nbsp; </span>';
             }
 
-            $properties .=  $this->span($prop->getName(), $this->_obj_prop_name, 'obj_prop_name');
-            $properties .=  $this->span(' : ', $this->_obj_prop_accessor, 'obj_prop_accessor');
+            $format .= '<span class="_obj_prop_name" style="color:#' . $this->_obj_prop_name . '">' . $prop->getName() . '</span>';
+            $format .= '<span class="obj_prop_accessor" style="color:#' . $this->_obj_prop_acc . '"> : </span>';
 
             $prop->setAccessible(true);
-            $properties .= $this->format([$prop->getValue($objects)]);
-
+            $format .= $this->format([$prop->getValue($objects)]);
         }
 
         $name =  '(' . $obj->getName() . ')';
-        $temp .= $this->span($name, $this->_object_name, 'object_name', 'font-style:italic;');
-        $temp .= $this->length($size + 1);
-        $temp .= $properties . '</div>';
+        $temp .= '<span class="object" style="font-style:italic;color:#' . $this->_object_name . '">' . $name . '</span>';
+        $temp .= '<span class="lenght" style="color:#' . $this->_lenght . '">';
+        $temp .= '(size=' . ($size + 1) . ')</span>';
+
+        $temp .= $format . '</div>';
         return $temp;
     }
 
+    /**
+     * formats argument
+     *
+     * @param array $arguments
+     * @param bool $array_loop
+     * @return string
+     */
     private function format(array $arguments, bool $array_loop = false): string
     {
-        $format = null;
+        $format = '';
         foreach ($arguments as $arg)
         {
             $type = gettype($arg);
-
             if ($type == 'string')
             {
-                $format .= $this->span("'$arg'", $this->_string, 'string');
-                $format .= $this->length(strlen($arg));
-                $format .= $this->type($type);
+                $arg =  htmlspecialchars($arg);
+                $format .= '<span class="string" style="color:#' . $this->_string . '">\'' . $arg . '\'</span>';
+                $format .= '<span class="lenght" style="color:#' . $this->_lenght . '">';
+                $format .= '(length=' . strlen($arg) . ')</span>';
+                $format .= '<span class="type" style="font-size:10px;margin-left:7px;color:#' . $this->_type . '">';
+                $format .= $type . '</span>';
             }
             elseif ($type == 'integer')
             {
-                $format .= $this->span($arg, $this->_integer, 'int');
-                $format .= $this->type($type);
+                $format .= '<span class="integer" style="color:#' . $this->_integer . '">' . $arg . '</span>';
+                $format .= '<span class="type" style="font-size:10px;margin-left:7px;color:#' . $this->_type . '">';
+                $format .= $type . '</span>';
+            }
+            elseif ($type == 'boolean')
+            {
+                $arg = ($arg) ? 'true' : 'false';
+                $format .= '<span class="bool" style="color:#' . $this->_bool . '">' . $arg . '</span>';
+                $format .= '<span class="type" style="font-size:10px;margin-left:7px;color:#' . $this->_type . '">';
+                $format .= $type . '</span>';
             }
             elseif ($type == 'double')
             {
-                $format .= $this->span($arg, $this->_double, 'double');
-                $format .= $this->type($type);
+                $format .= '<span class="double" style="color:#' . $this->_double . '">' . $arg . '</span>';
+                $format .= '<span class="type" style="font-size:10px;margin-left:7px;color:#' . $this->_type . '">';
+                $format .= $type . '</span>';
+            }
+            elseif ($type == 'NULL')
+            {
+                $format .= '<span class="null" style="color:#' . $this->_null . '">null</span>';
+                $format .= '<span class="type" style="font-size:10px;margin-left:7px;color:#' . $this->_type . '">';
+                $format .= $type . '</span>';
             }
             elseif ($type == 'float')
             {
-                $format .= $this->span($arg, $this->_float, 'float');
-                $format .= $this->type($type);
+                $format .= '<span class="float" style="color:#' . $this->_float . '">' . $arg . '</span>';
+                $format .= '<span class="type" style="font-size:10px;margin-left:7px;color:#' . $this->_type . '">';
+                $format .= $type . '</span>';
             }
             elseif ($type == 'array')
             {
-                $i = 0;
-                $format .= $this->array_parent(count($arg), ($array_loop) ? 1 : 0);
+                if ( ! $array_loop)
+                {
+                    $format .= '<span class="string" style="font-weight:bold;color:#' . $this->_array . '">array</span>';
+                    $format .= '<span class="lenght" style="margin:0 5px;color:#' . $this->_lenght . '">';
+                    $format .= '(length=' . count($arg) . ')</span>';
+                    $format .= '<span class="string" style="font-weight:bold;color:#' . $this->_array . '">[</span>';
+                    $format .= '<div class="arr_content" style="padding-left:20px;">';
+                }
+
                 foreach ($arg as $key => $value)
                 {
-                    if ( empty($value))
+                    $key = htmlspecialchars($key);
+                    if ( is_array($value))
                     {
-                        $_format = $this->array_key($key, 1);
-                        $_format .= $this->array_parent(count($value), 1);
+                        $format .= '<span class="string" style="color:#' . $this->_parent_arr . '">\'' . $key . '\'</span>';
+                        $format .= '<span class="string" style="color:#' . $this->_parant_arr_acc . '"> = </span>';
+
+                        $format .= '<span class="string" style="font-weight:bold;color:#' . $this->_array . '">array</span>';
+                        $format .= '<span class="lenght" style="margin:0 5px;color:#' . $this->_lenght . '">';
+                        $format .= '(length=' . count($value) . ')</span>';
+                        $format .= '<span class="string" style="color:#' . $this->_array . '">{</span>';
+                        $format .= '<div class="arr_content" style="padding-left:20px;">';
+
+                        $format .= $this->format([$value], true);
+
+                        $format .= '</div>';
+                        $format .= '<span class="string" style="color:#' . $this->_array . '">}</span><br />';
                     }
                     else
                     {
-                        if (is_array($value))
-                        {
-                            $_format = $this->array_key($key, 1);
-                            foreach ($value as $keys => $val)
-                            {
-                                if (is_array($val))
-                                {
-                                    $_format = $this->format([$value], true);
-                                }
-                                else
-                                {
-                                    $_format = $this->format([$value], true);
-                                }
-                            }
-                            $_format = $this->array_key($key, 1) . $_format;
-                        }
-                        else
-                        {
-                            $_format = $this->array_key($key);
-                            $_format .= $this->format([$value]);
-                        }
+                        $format .= '<span class="string" style="color:#' . $this->_child_arr . '">\'' . $key . '\'</span>';
+                        $format .= '<span class="string" style="color:#' . $this->_child_arr_acc . '"> => </span>';
+                        $format .= $this->format([$value], true);
                     }
-                    $format = str_replace($this->_room_name . $i, $_format, $format);
-                    $i++;
-                    $this->last_exec = $i;
                 }
 
+                if ( ! $array_loop)
+                {
+                    $format .= '</div>';
+                    $format .= '<span class="string" style="font-weight:bold;color:#' . $this->_array . '">]</span>';
+                }
             }
             elseif ($type == 'object')
             {
                 $format .= $this->objects($arg);
             }
-            $format .= '<br />';
+
+            if ( ! $array_loop)
+            {
+                $format .= '<br />';
+            }
         }
-        return sprintf('<%1$s>%2$s</%1$s>', $this->tag, $format);
+        return $format;
     }
 }
