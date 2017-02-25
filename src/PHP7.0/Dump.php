@@ -248,6 +248,7 @@ class Dump
                         $format .= '<span class="string" style="color:#' . $this->_child_arr . '">\'' . $key . '\'</span>';
                         $format .= '<span class="string" style="color:#' . $this->_child_arr_acc . '"> => </span>';
                         $format .= $this->format([$value], true);
+                        $format .= '<br />';
                     }
                 }
 
