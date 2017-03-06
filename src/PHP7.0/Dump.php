@@ -128,6 +128,7 @@ class Dump
 
         $temp = '<span class="object" style="font-weight:bold;color:#' . $this->_object . '">object</span>';
         $format = '<div style="padding-left:20px;" class="obj_prop">';
+        $size = 0;
 
         foreach ($obj->getProperties() as $size => $prop)
         {
@@ -149,12 +150,13 @@ class Dump
 
             $prop->setAccessible(true);
             $format .= $this->format([$prop->getValue($objects)]);
+            $size++;
         }
 
         $name =  '(' . $obj->getName() . ')';
         $temp .= '<span class="object" style="font-style:italic;color:#' . $this->_object_name . '">' . $name . '</span>';
         $temp .= '<span class="lenght" style="color:#' . $this->_lenght . '">';
-        $temp .= '(size=' . ($size + 1) . ')</span>';
+        $temp .= '(size=' . ($size) . ')</span>';
 
         $temp .= $format . '</div>';
         return $temp;
