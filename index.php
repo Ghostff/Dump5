@@ -1,5 +1,5 @@
 <?php
-require 'src/Dump.php';
+require 'src/PHP7.0/Dump.php';
 
 $m = array(
 	'fname' => null,
@@ -23,8 +23,8 @@ $country = array (
 		'Ukraine'
 	)
 ));
-         
-         
+
+
 $yes = 'yes';
 $no = 'no';
 
@@ -39,5 +39,4 @@ class Test
 //Dump::config('name', '#F00');
 //Dump::config('marg', 22);
 
-new Dump(new Test, $m, 'Hey', 10, null, $country);
-new Dump($yes == $no);
+new Dump('hey');

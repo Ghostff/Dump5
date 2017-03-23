@@ -113,7 +113,10 @@ class Dump
      */
     public function __construct()
     {
-        echo  '<code>' . $this->format(func_get_args()) . '</code>';
+        $bt = debug_backtrace();
+        $file = $bt[0]['file'] . '(line:' . $bt[0]['line'] . ')';
+        $file = '<span class="type" style="font-size:10px;color:7px;">' . $file . '</span><br />';
+        echo  '<code>' . $file . $this->format(func_get_args()) . '</code>';
     }
 
     /**
