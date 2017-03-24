@@ -213,7 +213,9 @@ class Dump
             $type = gettype($arg);
             if ($type == 'string')
             {
-                $arg =  htmlspecialchars($arg);
+                #prevent html string output. we don't necessary need replace the closing tag str_replace(['<', '>'], ['&lt;', '&gt;'], $arg)
+                #And using htmlspecialchars or htmlentities is not a good idea.
+                $arg =  str_replace('<', '&lt;', $arg);
                 $format .= '<span class="string" style="color:#' . $this->_string . '">\'' . $arg . '\'</span>';
                 $format .= '<span class="lenght" style="color:#' . $this->_lenght . '">';
                 $format .= '(length=' . strlen($arg) . ')</span>';

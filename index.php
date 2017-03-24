@@ -38,5 +38,6 @@ class Test
 
 //Dump::config('name', '#F00');
 //Dump::config('marg', 22);
-
-new Dump('hey');
+$m = random_bytes(10);
+var_dump($m);
+new Dump('hey', $m, '<br />');
