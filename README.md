@@ -3,7 +3,7 @@ A pretty version of php [var_dump](http://php.net/manual/en/function.var-dump.ph
 
 
 ----------
-*Dump implementation on 5.3 is a bit different from 7.0. All new functionality and fixes are implemented on 7.1 though some might be extended to 5.3.*
+*Dump implementation in 5.3 is a bit different from 7.0. All new functionality and fixes are implemented on 7.1 though some might be extended to 5.3.*
 
 ----------
 
@@ -47,7 +47,7 @@ new Debug\Dump(1 == '1', 1 === '1');
 ```
 Replacing predefined colors:
 ```php
-Debug\Dump::config('bool', 'F00');
+Debug\Dump::set('bool', 'F00');
 new Debug\Dump(false, true);
 ```
 The above codes outputs

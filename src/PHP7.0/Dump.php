@@ -145,12 +145,12 @@ class Dump
 
 
     /**
-     * updates properties value
+     * updates color properties value
      *
      * @param string $name
      * @param string $new_value
      */
-    public static function config(string $name, string $new_value): void
+    public static function set(string $name, string $new_value): void
     {
         self::$configurations[$name] = $new_value;
     }
