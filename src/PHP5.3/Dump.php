@@ -1,5 +1,7 @@
 <?php
 
+namespace Dump;
+
 class Dump
 {
     private $name      = '#f07b06';//default orange

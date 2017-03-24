@@ -109,14 +109,47 @@ class Dump
     private $_child_arr_acc = 'f00000';
 
     /**
+     * @var array
+     */
+    private static $configurations = [];
+
+
+    /**
      * Dump constructor.
      */
     public function __construct()
     {
+        if (self::$configurations !== [])
+        {
+            foreach (self::$configurations as $name => $value)
+            {
+                if (property_exists($this, $name))
+                {
+                    $this->{$name} = $value;
+                }
+                else
+                {
+                    throw new RuntimeException('property ' . $name . ' does not exist');
+                }
+            }
+        }
+
         $bt = debug_backtrace();
         $file = $bt[0]['file'] . '(line:' . $bt[0]['line'] . ')';
         $file = '<span class="type" style="font-size:10px;color:7px;">' . $file . '</span><br />';
         echo  '<code>' . $file . $this->format(func_get_args()) . '</code>';
+    }
+
+
+    /**
+     * updates properties value
+     *
+     * @param string $name
+     * @param string $new_value
+     */
+    public static function config(string $name, string $new_value): void
+    {
+        self::$configurations[$name] = $new_value;
     }
 
     /**
