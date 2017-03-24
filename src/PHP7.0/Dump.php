@@ -33,83 +33,85 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+namespace Debug;
+
 class Dump
 {
     /**
-     * @var string
+     * @var string - null data type
      */
     private $_null = '6789f8';
     /**
-     * @var string
+     * @var string - variable type
      */
     private $_type = 'AAAAAA';
     /**
-     * @var string
+     * @var string - bool data type
      */
     private $_bool = 'bb02ff';
     /**
-     * @var string
+     * @var string - array data type
      */
     private $_array	= '000000';
     /**
-     * @var string
+     * @var string - float data type
      */
     private $_float = '9C6E25';
     /**
-     * @var string
+     * @var string - double data type
      */
     private $_double = '9C6E25';
     /**
-     * @var string
+     * @var string - string data  type
      */
     private $_string = '0000FF';
     /**
-     * @var string
+     * @var string - length of any data value
      */
     private $_lenght = '5BA415';
     /**
-     * @var string
+     * @var string - int data type
      */
     private $_integer = '1BAABB';
     /**
-     * @var string
+     * @var string - object data type
      */
     private $_object = '000000';
     /**
-     * @var string
+     * @var string - object properties visibility
      */
     private $_vsble = '741515';
     /**
-     * @var string
+     * @var string - object name
      */
     private $_object_name = '5ba415';
     /**
-     * @var string
+     * @var string - object property name
      */
     private $_obj_prop_name = '987a00';
     /**
-     * @var string
+     * @var string - object property name and value separator
      */
     private $_obj_prop_acc = 'f00000';
     /**
-     * @var string
+     * @var string - array of array key
      */
-    private $_parent_arr = 'f07b06';
+    private $_parent_arr = '59829e';
     /**
-     * @var string
+     * @var string - array of array accessor symbol
      */
     private $_parent_arr_acc = 'e103c4';
     /**
-     * @var string
+     * @var string - array
      */
     private $_child_arr = 'f07b06';
     /**
-     * @var string
+     * @var string - array value accessor symbol
      */
     private $_child_arr_acc = 'f00000';
 
     /**
-     * @var array
+     * @var array - runtime color buffer
      */
     private static $configurations = [];
 
@@ -123,6 +125,7 @@ class Dump
         {
             foreach (self::$configurations as $name => $value)
             {
+                $name = '_' . $name;
                 if (property_exists($this, $name))
                 {
                     $this->{$name} = $value;

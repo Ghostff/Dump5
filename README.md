@@ -1,53 +1,56 @@
 # Pretty Data Dump
-A pretty version of php var_dump
+A pretty version of php [var_dump](http://php.net/manual/en/function.var-dump.php). This class displays structured information about one or more expressions that includes its type and value.
+
+
+----------
+*Dump implementation on 5.3 is a bit different from 7.0. All new functionality and fixes are implemented on 7.1 though some might be extended to 5.3.*
+
+----------
+
 
 ```php
-require 'src/PHP5.3/Dump.php';
 
-$m = array(
-	'fname' => null,
-	'lname' => true
-);
-$c = array(
-	'class' => 'cosc',
-	'sch' => 'hccs',
-	array(
-		'td' => array(
-			'm' => 8.5
-		)
-	));
-$m[] = $c;
-
-
-$country = array (
-	array("U" => array(
-		'United States',
-		'United Kingdom',
-		'Ukraine'
-	)
-));
-         
-         
-$yes = 'yes';
-$no = 'no';
-
-class Test
+class Foo
 {
-	private $g = 'string';
-	protected $r = 10;
-	public $e = array('m', 'n');
-	protected $f = false;
+	private $string = 'string';
+	protected $int = 10;
+	public $array = [
+	    'foo'   => 'bar'
+	];
+	protected static $bool = false;
 }
 
-//Dump::config('name', '#F00');
-//Dump::config('marg', 22);
+$string = 'Foobar';
+$array = ['foo', 'bar'];
+$int = 327626;
+$double = 22.223;
+$null = null;
+$bool = true;
 
-#uses func_get_args (No argument limit)
-new Dump(new Test, $m, 'Hey', 10, null, $country);
-new Dump($yes == $no);
 
+new Debug\Dump(new Foo, $string, $array, $int, $double, $null, $bool, [
+    'foo' => 'bar',
+    'bar' => 'foo',
+    [
+        'foo' => 'foobar',
+        'bar_foo',
+        2 => 'foo',
+        'foo' => [
+            'barbar' => 55,
+            'foofoo' => false,
+            'foobar' => null,
+        ]
+    ]
+]);
 
+new Debug\Dump(1 == '1', 1 === '1');
 ```
-The above code outputs
+Replacing predefined colors:
+```php
+Debug\Dump::config('bool', 'F00');
+new Debug\Dump(false, true);
+```
+The above codes outputs
 
 ![alt tag](https://github.com/Ghostff/pretty_data_dump.php/blob/master/SS.png)
+
