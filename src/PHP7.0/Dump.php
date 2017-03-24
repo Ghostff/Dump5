@@ -217,7 +217,7 @@ class Dump
             if ($type == 'string')
             {
                 #prevent html string output. we don't necessary need to replace the closing tag. str_replace(['<', '>'], ['&lt;', '&gt;'], $arg)
-                #And using htmlspecialchars or htmlentities is won't be a good idea,
+                #And using htmlspecialchars or htmlentities won't be a good idea,
                 #since some data might end up being striped during HTML entities conversion eg: pseudo-random bytes.
                 $arg =  str_replace('<', '&lt;', $arg);
                 $format .= '<span class="string" style="color:#' . $this->_string . '">\'' . $arg . '\'</span>';
