@@ -98,7 +98,7 @@ class Dump
     /**
      * @var string
      */
-    private $_parant_arr_acc = 'e103c4';
+    private $_parent_arr_acc = 'e103c4';
     /**
      * @var string
      */
@@ -270,7 +270,7 @@ class Dump
                     if ( is_array($value))
                     {
                         $format .= '<span class="string" style="color:#' . $this->_parent_arr . '">\'' . $key . '\'</span>';
-                        $format .= '<span class="string" style="color:#' . $this->_parant_arr_acc . '"> = </span>';
+                        $format .= '<span class="string" style="color:#' . $this->_parent_arr_acc . '"> = </span>';
 
                         $format .= '<span class="string" style="font-weight:bold;color:#' . $this->_array . '">array</span>';
                         $format .= '<span class="lenght" style="margin:0 5px;color:#' . $this->_lenght . '">';
