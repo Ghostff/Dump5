@@ -125,10 +125,10 @@ class Dump
         {
             foreach (self::$configurations as $name => $value)
             {
-                $name = '_' . $name;
-                if (property_exists($this, $name))
+                $_name = '_' . $name;
+                if (property_exists($this, $_name))
                 {
-                    $this->{$name} = $value;
+                    $this->{$_name} = $value;
                 }
                 else
                 {
@@ -216,8 +216,9 @@ class Dump
             $type = gettype($arg);
             if ($type == 'string')
             {
-                #prevent html string output. we don't necessary need replace the closing tag str_replace(['<', '>'], ['&lt;', '&gt;'], $arg)
-                #And using htmlspecialchars or htmlentities is not a good idea.
+                #prevent html string output. we don't necessary need to replace the closing tag. str_replace(['<', '>'], ['&lt;', '&gt;'], $arg)
+                #And using htmlspecialchars or htmlentities is won't be a good idea,
+                #since some data might end up being striped during HTML entities conversion eg: pseudo-random bytes.
                 $arg =  str_replace('<', '&lt;', $arg);
                 $format .= '<span class="string" style="color:#' . $this->_string . '">\'' . $arg . '\'</span>';
                 $format .= '<span class="lenght" style="color:#' . $this->_lenght . '">';
@@ -269,7 +270,7 @@ class Dump
 
                 foreach ($arg as $key => $value)
                 {
-                    $key = htmlspecialchars($key);
+                    $key = str_replace('<', '&lt;', $key);
                     if ( is_array($value))
                     {
                         $format .= '<span class="string" style="color:#' . $this->_parent_arr . '">\'' . $key . '\'</span>';
