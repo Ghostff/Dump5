@@ -119,6 +119,37 @@ class Dump
      */
     private static $configurations = [];
 
+    private static $cli_sub = 0;
+
+    private static $use = '';
+
+
+    private function isCLI(): bool
+    {
+        $use = self::$use;
+        if ($use != '')
+        {
+            return ($use == 'cgi') ? false : true;
+        }
+        return ((substr(PHP_SAPI, 0, 3) === 'cli') && ! isset($_SERVER['REMOTE_ADDR']));
+    }
+
+
+    /**
+     * Sets script execution interface.
+     *
+     * @param string $type
+     */
+    public static function use(string $type)
+    {
+        if($type != 'cgi' && $type != 'cli')
+        {
+            throw new \RuntimeException('use argument must be "cli" or "cgi"');
+        }
+
+        self::$use = $type;
+
+    }
 
     /**
      * Dump constructor.
@@ -143,8 +174,18 @@ class Dump
 
         $bt = debug_backtrace();
         $file = $bt[0]['file'] . '(line:' . $bt[0]['line'] . ')';
-        $file = '<span class="type" style="font-size:10px;color:7px;">' . $file . '</span><br />';
-        echo  '<code>' . $file . $this->format(func_get_args()) . '</code>';
+
+        if ($this->isCLI())
+        {
+            $dump = $this->formatCLI(func_get_args());
+            echo $file . "\n" . $dump;
+        }
+        else
+        {
+            $file = '<span class="type" style="font-size:10px;">' . $file . '</span><br />';
+            echo  '<code>' . $file . $this->formatCGI(func_get_args()) . '</code>';
+        }
+
     }
 
 
@@ -154,18 +195,18 @@ class Dump
      * @param string $name
      * @param string $new_value
      */
-    public static function set(string $name, string $new_value): void
+    public static function set(string $name, string $new_value)
     {
         self::$configurations[$name] = $new_value;
     }
 
     /**
-     * object argument format
+     * object argument format for cgi
      *
      * @param $objects
      * @return string
      */
-    private function objects($objects): string
+    private function objectsCGI($objects): string
     {
         $obj = new \ReflectionObject($objects);
 
@@ -192,7 +233,7 @@ class Dump
             $format .= '<span class="obj_prop_accessor" style="color:#' . $this->_obj_prop_acc . '"> : </span>';
 
             $prop->setAccessible(true);
-            $format .= $this->format([$prop->getValue($objects)]);
+            $format .= $this->formatCGI([$prop->getValue($objects)]);
             $size++;
         }
 
@@ -206,13 +247,58 @@ class Dump
     }
 
     /**
-     * formats argument
+     * object argument format for cli
+     *
+     * @param $objects
+     * @return string
+     */
+    private function objectsCLI($objects): string
+    {
+        $obj = new \ReflectionObject($objects);
+
+        $temp = 'object ->';
+        $format = '';
+        $size = 0;
+
+        self::$cli_sub += 3;
+        $padding = str_repeat(' ', self::$cli_sub);
+        foreach ($obj->getProperties() as $size => $prop)
+        {
+            if ($prop->isPrivate())
+            {
+                $format .= $padding . 'private   ';
+            }
+            elseif ($prop->isProtected())
+            {
+                $format .= $padding . 'protected ';
+            }
+            elseif ($prop->isPublic())
+            {
+                $format .= $padding . 'public    ';
+            }
+
+            $format .= $prop->getName() . ' : ';
+            $prop->setAccessible(true);
+            $format .= $this->formatCLI([$prop->getValue($objects)]);
+            $size++;
+        }
+        self::$cli_sub -= 3;
+
+        $name =  '(' . $obj->getName() . ')';
+        $temp .=  $name . ' (size=' . ($size) . ') ' . "\n";
+
+        $temp .= $format . "\n";
+        return $temp;
+    }
+
+    /**
+     * formats argument for cgi
      *
      * @param array $arguments
      * @param bool $array_loop
      * @return string
      */
-    private function format(array $arguments, bool $array_loop = false): string
+    private function formatCGI(array $arguments, bool $array_loop = false): string
     {
         $format = '';
         foreach ($arguments as $arg)
@@ -264,7 +350,7 @@ class Dump
                 {
                     $format .= '<span class="string" style="font-weight:bold;color:#' . $this->_array . '">array</span>';
                     $format .= '<span class="lenght" style="margin:0 5px;color:#' . $this->_lenght . '">';
-                    $format .= '(length=' . count($arg) . ')</span>';
+                    $format .= '(size=' . count($arg) . ')</span>';
                     $format .= '<span class="string" style="font-weight:bold;color:#' . $this->_array . '">[</span>';
                     $format .= '<div class="arr_content" style="padding-left:20px;">';
                 }
@@ -279,11 +365,11 @@ class Dump
 
                         $format .= '<span class="string" style="font-weight:bold;color:#' . $this->_array . '">array</span>';
                         $format .= '<span class="lenght" style="margin:0 5px;color:#' . $this->_lenght . '">';
-                        $format .= '(length=' . count($value) . ')</span>';
+                        $format .= '(size=' . count($value) . ')</span>';
                         $format .= '<span class="string" style="color:#' . $this->_array . '">{</span>';
                         $format .= '<div class="arr_content" style="padding-left:20px;">';
 
-                        $format .= $this->format([$value], true);
+                        $format .= $this->formatCGI([$value], true);
 
                         $format .= '</div>';
                         $format .= '<span class="string" style="color:#' . $this->_array . '">}</span><br />';
@@ -292,7 +378,7 @@ class Dump
                     {
                         $format .= '<span class="string" style="color:#' . $this->_child_arr . '">\'' . $key . '\'</span>';
                         $format .= '<span class="string" style="color:#' . $this->_child_arr_acc . '"> => </span>';
-                        $format .= $this->format([$value], true);
+                        $format .= $this->formatCGI([$value], true);
                         $format .= '<br />';
                     }
                 }
@@ -305,7 +391,7 @@ class Dump
             }
             elseif ($type == 'object')
             {
-                $format .= $this->objects($arg);
+                $format .= $this->objectsCGI($arg);
             }
 
             if ( ! $array_loop)
@@ -314,5 +400,86 @@ class Dump
             }
         }
         return str_replace('<br /></div><br />', '<br /></div>', nl2br($format));
+    }
+
+    /**
+     * formats argument for cli
+     *
+     * @param array $arguments
+     * @param bool $array_loop
+     * @return string
+     */
+    private function formatCLI(array $arguments, bool $array_loop = false): string
+    {
+        $format = '';
+        $nl = "\n";
+        foreach ($arguments as $arg)
+        {
+            $type = gettype($arg);
+            if ($type == 'string')
+            {
+                $format .= '\'' . $arg . '\' (length=' . strlen($arg) . ') string';
+            }
+            elseif ($type == 'integer')
+            {
+                $format .= $arg . ' int';
+            }
+            elseif ($type == 'boolean')
+            {
+                $arg = ($arg) ? 'true' : 'false';
+                $format .=  $arg . ' bool   ';
+            }
+            elseif ($type == 'double')
+            {
+                $format .= $arg . ' double   ';
+            }
+            elseif ($type == 'NULL')
+            {
+                $format .= 'null NULL';
+            }
+            elseif ($type == 'float')
+            {
+                $format .= $arg . ' float';
+            }
+            elseif ($type == 'array')
+            {
+                if ( ! $array_loop)
+                {
+                    $format .= 'array (size=' . count($arg) . ') [' . $nl;
+                }
+
+                self::$cli_sub += 3;
+                $padding = str_repeat(' ', self::$cli_sub);
+                foreach ($arg as $key => $value)
+                {
+                    if ( is_array($value))
+                    {
+                        $format .= $padding . '\'' . $key . '\' = array (size=' . count($value) . ') {' . $nl;
+                        $format .= $this->formatCLI([$value], true);
+                        $format .= $padding . '}' . $nl;
+                    }
+                    else
+                    {
+                        $format .=  $padding . '\'' . $key . '\' => ' . $this->formatCLI([$value], true) . $nl;
+                    }
+                }
+                self::$cli_sub -= 3;
+
+                if ( ! $array_loop)
+                {
+                    $format .= str_repeat(' ', self::$cli_sub) . ']';
+                }
+            }
+            elseif ($type == 'object')
+            {
+                $format .= $this->objectsCLI($arg);
+            }
+
+            if ( ! $array_loop)
+            {
+                $format .= $nl;
+            }
+        }
+        return $format;
     }
 }
