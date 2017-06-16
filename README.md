@@ -52,9 +52,9 @@ new Debug\Dump(false, true);
 ```
 CGI output:    
 
-![alt tag](cgi.png)
+![cgi screenshot](cgi.png)
 
 CLI output:     
     
-![alt tag](cli.png)
+![cli screenshot](cli.png)
 
