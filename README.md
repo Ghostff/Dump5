@@ -50,7 +50,11 @@ Replacing predefined colors:
 Debug\Dump::set('bool', 'F00');
 new Debug\Dump(false, true);
 ```
-The above codes outputs
+CGI output:    
 
-![alt tag](https://github.com/Ghostff/pretty_data_dump.php/blob/master/SS.png)
+![alt tag](cgi.png)
+
+CLI output:     
+    
+![alt tag](cli.png)
 
