@@ -52,7 +52,7 @@ new Debug\Dump(false, true);
 ```
 CGI output:    
 
-![cgi screenshot](cgi.png)
+![cgi screenshot](cgi.PNG)
 
 CLI output:     
     
