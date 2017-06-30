@@ -399,7 +399,7 @@ class Dump
                 $format .= '<br />';
             }
         }
-        return str_replace('<br /></div><br />', '<br /></div>', nl2br($format));
+        return str_replace(array('<br /></div><br />', '  '), array('<br /></div>', '&nbsp;&nbsp;'), nl2br($format));
     }
 
 

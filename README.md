@@ -52,9 +52,9 @@ new Debug\Dump(false, true);
 ```
 CGI output:    
 
-![cgi screenshot](cgi.PNG)
+![cgi screenshot](https://github.com/Ghostff/pretty_data_dump/blob/master/cgi.png)
 
 CLI output:     
     
-![cli screenshot](cli.png)
+![cli screenshot](https://github.com/Ghostff/pretty_data_dump/blob/master/cli.png)
 
