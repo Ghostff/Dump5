@@ -1,0 +1,22 @@
+{
+    "name": "ghostff/pretty_data_dump",
+    "description": "A pretty version of php var_dump. This class displays structured information about one or more expressions that includes its type and value.",
+    "type": "library",
+    "keywords" : ["debuger", "var_dump", "data_dump"],
+    "license": "BSD",
+    "authors": [
+        {
+            "name": "Chrys Ugwu",
+            "email": "frankchris@hotmail.com"
+        }
+    ],
+    "require": {
+		"php": ">=5.3"	
+	},
+	"autoload" : {
+		"psr-4" : {
+		  	"Dbug7\\" : "src/PHP7.0",
+		  	"Dbug5\\" : "src/PHP5.3",
+		}
+    }
+}
