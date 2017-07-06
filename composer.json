@@ -15,8 +15,8 @@
 	},
 	"autoload" : {
 		"psr-4" : {
-		  	"Dbug7\\" : "src/PHP7.0",
-		  	"Dbug5\\" : "src/PHP5.3",
+		  	"Dump7\\" : "src/",
+		  	"Dbug5\\" : "src/"
 		}
     }
 }

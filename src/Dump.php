@@ -37,9 +37,8 @@
  *
  */
 
-namespace Debug;
 
-class Dump
+class Dump7
 {
     /**
      * @var string - null data type

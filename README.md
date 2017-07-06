@@ -7,6 +7,17 @@ A pretty version of php [var_dump](http://php.net/manual/en/function.var-dump.ph
 
 ----------
 
+#Installation   
+You can download the  Latest [release version ](https://github.com/Ghostff/Dbug/releases/) as a standalone, alternatively you can use [Composer](https://getcomposer.org/) 
+```json
+$ composer require ghostff/dbug
+```
+```json
+"require": {
+    "ghostff/dbug": "^1.0"
+}
+```    
+#Usage
 
 ```php
 

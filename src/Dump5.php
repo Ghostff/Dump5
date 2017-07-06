@@ -37,8 +37,6 @@
  *
  */
 
-namespace Debug;
-
 class Dump
 {
     /**
