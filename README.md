@@ -44,7 +44,7 @@ $null = null;
 $bool = true;
 
 
-new Dump3(new Foo, $string, $array, $int, $double, $null, $bool, [
+new Dump5(new Foo, $string, $array, $int, $double, $null, $bool, [
     'foo' => 'bar',
     'bar' => 'foo',
     [
@@ -59,12 +59,12 @@ new Dump3(new Foo, $string, $array, $int, $double, $null, $bool, [
     ]
 ]);
 
-new Dump(1 == '1', 1 === '1');
+new Dump5(1 == '1', 1 === '1');
 ```
 Replacing predefined colors:
 ```php
-Dump3::set('bool', 'F00');
-new Dump3(false, true);
+Dump5::set('bool', 'F00');
+new Dump5(false, true);
 ```
 CGI output:    
 
