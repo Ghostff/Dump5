@@ -8,16 +8,21 @@ A pretty version of php [var_dump](http://php.net/manual/en/function.var-dump.ph
 ----------
 
 #Installation   
-You can download the  Latest [release version ](https://github.com/Ghostff/Dbug/releases/) as a standalone, alternatively you can use [Composer](https://getcomposer.org/) 
+You can download the  Latest [release version ](https://github.com/Ghostff/pretty_data_dump/releases/) as a standalone, alternatively you can use [Composer](https://getcomposer.org/) 
 ```json
-$ composer require ghostff/dbug
+$ composer require ghostff/pretty_data_dump
 ```
 ```json
 "require": {
-    "ghostff/dbug": "^1.0"
+    "ghostff/pretty_data_dump": "^1.0"
 }
 ```    
 #Usage
+```php
+new Dump7(...); # For PHP 7+
+new Dump5(...); # For PHP 5+
+```
+
 
 ```php
 
@@ -39,7 +44,7 @@ $null = null;
 $bool = true;
 
 
-new Debug\Dump(new Foo, $string, $array, $int, $double, $null, $bool, [
+new Dump3(new Foo, $string, $array, $int, $double, $null, $bool, [
     'foo' => 'bar',
     'bar' => 'foo',
     [
@@ -54,12 +59,12 @@ new Debug\Dump(new Foo, $string, $array, $int, $double, $null, $bool, [
     ]
 ]);
 
-new Debug\Dump(1 == '1', 1 === '1');
+new Dump(1 == '1', 1 === '1');
 ```
 Replacing predefined colors:
 ```php
-Debug\Dump::set('bool', 'F00');
-new Debug\Dump(false, true);
+Dump3::set('bool', 'F00');
+new Dump3(false, true);
 ```
 CGI output:    
 
