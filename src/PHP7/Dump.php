@@ -38,7 +38,7 @@
  */
 
 
-class Dump7
+class Dump
 {
     /**
      * @var string - null data type
