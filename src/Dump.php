@@ -380,8 +380,7 @@ class Dump
     /**
      * Indents line content.
      *
-     * @param bool|null $pad
-     * @param int $hard
+     * @param int $pad
      * @return string
      */
     private function indent($pad)
