@@ -37,448 +37,552 @@
  *
  */
 
-
 class Dump
 {
-    /**
-     * @var string - null data type
-     */
-    private $_null = '6789f8';
-    /**
-     * @var string - variable type
-     */
-    private $_type = 'AAAAAA';
-    /**
-     * @var string - bool data type
-     */
-    private $_bool = 'bb02ff';
-    /**
-     * @var string - array data type
-     */
-    private $_array	= '000000';
-    /**
-     * @var string - float data type
-     */
-    private $_float = '9C6E25';
-    /**
-     * @var string - double data type
-     */
-    private $_double = '9C6E25';
-    /**
-     * @var string - string data  type
-     */
-    private $_string = '0000FF';
-    /**
-     * @var string - length of any data value
-     */
-    private $_lenght = '5BA415';
-    /**
-     * @var string - int data type
-     */
-    private $_integer = '1BAABB';
-    /**
-     * @var string - object data type
-     */
-    private $_object = '000000';
-    /**
-     * @var string - object properties visibility
-     */
-    private $_vsble = '741515';
-    /**
-     * @var string - object name
-     */
-    private $_object_name = '5ba415';
-    /**
-     * @var string - object property name
-     */
-    private $_obj_prop_name = '987a00';
-    /**
-     * @var string - object property name and value separator
-     */
-    private $_obj_prop_acc = 'f00000';
-    /**
-     * @var string - array of array key
-     */
-    private $_parent_arr = '59829e';
-    /**
-     * @var string - array of array accessor symbol
-     */
-    private $_parent_arr_acc = 'e103c4';
-    /**
-     * @var string - array
-     */
-    private $_child_arr = 'f07b06';
-    /**
-     * @var string - array value accessor symbol
-     */
-    private $_child_arr_acc = 'f00000';
+    protected $isCli = false;
+
+    private $indent = 0;
+
+    private $nest_level = 20;
+
+    private $pad_size = 3;
+
+    private $output = null;
+
+    private $isPosix = false;
+
+    private $colors = [
+        'string'                => ['0000FF', 'blue'],
+        'integer'               => ['1BAABB', 'light_green'],
+        'double'                => ['9C6E25', 'cyan'],
+        'boolean'               => ['bb02ff', 'purple'],
+        'null'                  => ['6789f8', 'white'],
+        'type'                  => ['AAAAAA', 'light_gray'],
+        'size'                  => ['5BA415', 'green'],
+        'recursion'             => ['F00000', 'red'],
+
+        'array'                 => ['000000', 'white'],
+        'multi_array_key'       => ['59829e', 'yellow'],
+        'single_array_key'      => ['f07b06', 'light_yellow'],
+        'multi_array_arrow'     => ['e103c4', 'red'],
+        'single_array_arrow'    => ['f00000', 'red'],
+
+        'object'                => ['000000', 'white'],
+        'property_visibility'   => ['741515', 'light_red'],
+        'property_name'         => ['987a00', 'light_cyan'],
+        'property_arrow'        => ['f00000', 'red'],
+
+    ];
+
+    private static $force_posix = false;
+
+    private static $changes = [];
 
     /**
-     * @var array - runtime color buffer
+     * Foreground colors map
+     * @var array
      */
-    private static $configurations = [];
-
-    private static $cli_sub = 0;
-
-    private static $use = '';
-
-
-    private function isCLI(): bool
-    {
-        $use = self::$use;
-        if ($use != '')
-        {
-            return ($use == 'cgi') ? false : true;
-        }
-        return ((substr(PHP_SAPI, 0, 3) === 'cli') && ! isset($_SERVER['REMOTE_ADDR']));
-    }
-
+    private $foregrounds = [
+        'none'          => null,
+        'black'         => 30,
+        'red'           => 31,
+        'green'         => 32,
+        'yellow'        => 33,
+        'blue'          => 34,
+        'purple'        => 35,
+        'cyan'          => 36,
+        'light_gray'    => 37,
+        'dark_gray'     => 90,
+        'light_red'     => 91,
+        'light_green'   => 92,
+        'light_yellow'  => 93,
+        'light_blue'    => 94,
+        'light_magenta' => 95,
+        'light_cyan'    => 96,
+        'white'         => 97,
+    ];
 
     /**
-     * Sets script execution interface.
-     *
-     * @param string $type
+     * Background colors map
+     * @var array
      */
-    public static function use(string $type)
-    {
-        if($type != 'cgi' && $type != 'cli')
-        {
-            throw new \RuntimeException('use argument must be "cli" or "cgi"');
-        }
+    private $backgrounds = [
+        'none'          => null,
+        'black'         => 40,
+        'red'           => 41,
+        'green'         => 42,
+        'yellow'        => 43,
+        'blue'          => 44,
+        'purple'        => 45,
+        'cyan'          => 46,
+        'light_gray'    => 47,
+        'dark_gray'     => 100,
+        'light_red'     => 101,
+        'light_green'   => 102,
+        'light_yellow'  => 103,
+        'light_blue'    => 104,
+        'light_magenta' => 105,
+        'light_cyan'    => 106,
+        'white'         => 107,
+    ];
 
-        self::$use = $type;
+    /**
+     * Styles map
+     * @var array
+     */
+    private $styles = [
+        'none'      => null,
+        'bold'      => 1,
+        'faint'     => 2,
+        'italic'    => 3,
+        'underline' => 4,
+        'blink'     => 5,
+        'negative'  => 7,
+    ];
 
-    }
 
     /**
      * Dump constructor.
      */
     public function __construct()
     {
-        if (self::$configurations !== [])
+        if (substr(PHP_SAPI, 0, 3) == 'cgi')
         {
-            foreach (self::$configurations as $name => $value)
-            {
-                $_name = '_' . $name;
-                if (property_exists($this, $_name))
-                {
-                    $this->{$_name} = $value;
-                }
-                else
-                {
-                    throw new RuntimeException('property ' . $name . ' does not exist');
-                }
-            }
+            $this->isCli = true;
+            $this->setOutputStream(STDIN);
         }
 
-        $bt = debug_backtrace();
-        $file = $bt[0]['file'] . '(line:' . $bt[0]['line'] . ')';
+        $this->colors = self::$changes + $this->colors;
+        $this->output($this->evaluate(func_get_args()));
+    }
 
-        if ($this->isCLI())
+    /**
+     * Force debug to use posix, (For window users who are using tools like http://cmder.net/)
+     */
+    public static function d()
+    {
+        self::$force_posix = true;
+        new self(func_get_args());
+    }
+
+    /**
+     * Updates color properties value.
+     *
+     * @param string $name
+     * @param array $value
+     */
+    public static function set(string $name, array $value)
+    {
+        self::$changes[$name] = $value;
+    }
+
+
+    /**
+     * Assert code nesting doesn't surpass specified limit.
+     *
+     * @return bool
+     */
+    public function aboveNestLevel(): bool
+    {
+        return (count(debug_backtrace()) > $this->nest_level);
+    }
+
+    /**
+     * Check if working under Windows
+     *
+     * @see http://stackoverflow.com/questions/738823/possible-values-for-php-os
+     * @return bool
+     */
+    private function isWindows(): bool
+    {
+        return
+            (defined('PHP_OS') && (substr_compare(PHP_OS, 'win', 0, 3, true) === 0)) ||
+            (getenv('OS') != false && substr_compare(getenv('OS'), 'windows', 0, 7, true));
+    }
+
+    /**
+     * Check if a resource is an interactive terminal
+     *
+     * @see https://github.com/auraphp/Aura.Cli/blob/2.x/src/Stdio/Handle.php#L117
+     * @param  resource  $resource
+     * @return bool
+     */
+    private function isPosix($resource): bool
+    {
+        if (self::$force_posix) {
+            return true;
+        }
+        // Windows
+        if ($this->isWindows())
         {
-            $dump = $this->formatCLI(func_get_args());
-            echo $file . "\n" . $dump;
+            return false;
+        }
+
+        // disable posix errors about unknown resource types
+        if (function_exists('posix_isatty'))
+        {
+            set_error_handler(function () {});
+            $isPosix = posix_isatty($resource);
+            restore_error_handler();
+            return $isPosix;
+        }
+
+        return false;
+    }
+
+    /**
+     * Sets output stream to write to
+     *
+     * @param $resource
+     * @throws Exception
+     */
+    public function setOutputStream($resource)
+    {
+        if (! is_resource($resource))
+        {
+            throw new Exception('Invalid resource');
+        }
+
+        // Detect posix terminal
+        $this->isPosix = $this->isPosix($resource);
+        $this->output = $resource;
+    }
+
+    /**
+     * Format string using ANSI escape sequences
+     *
+     * @param  string $string
+     * @param  string $format defaults to 'none|none|none'
+     * @return string
+     */
+    private function format(string $string, string $format = null): string
+    {
+        // format only for POSIX
+        if (! $format || ! $this->isPosix)
+        {
+            return $string;
+        }
+
+        $format = $format ? explode('|', $format) : [];
+
+        $code = array_filter([
+            $this->backgrounds[$format[1] ?: null] ?: null,
+            $this->styles[$format[2] ?: null] ?: null,
+            $this->foregrounds[$format[0] ?: null] ?: null,
+        ]);
+
+        $code = implode(';', $code);
+
+        return "\033[{$code}m{$string}\033[0m";
+    }
+
+    /**
+     * Writes dump to console.
+     *
+     * @param $message
+     * @param null|string $format
+     */
+    public function write(string $message, string $format = null)
+    {
+        fwrite($this->output, $this->format($message, $format));
+    }
+
+    /**
+     * Outputs formatted dump files.
+     *
+     * @param string $data
+     */
+    private function output(string $data): void
+    {
+        # Gets line
+        $bt = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+        foreach ($bt as $key => $value)
+        {
+            if ($value['file'] != __FILE__)
+            {
+                unset($bt[$key]);
+            }
+            else
+            {
+                $bt = $bt[((int) $key) + 1];
+                break;
+            }
+        }
+        $file = $bt['file'] . '(line:' . $bt['line'] . ')';
+        if (! $this->isCli)
+        {
+            echo '<code><small>' . $file . '</small><br />' . $data . '</code>';
         }
         else
         {
-            $file = '<span class="type" style="font-size:10px;">' . $file . '</span><br />';
-            echo  '<code>' . $file . $this->formatCGI(func_get_args()) . '</code>';
+            $this->write($data);
         }
-
     }
 
-
     /**
-     * updates color properties value
+     * Sets string color based on sapi.
      *
+     * @param $value
      * @param string $name
-     * @param string $new_value
+     * @return string
      */
-    public static function set(string $name, string $new_value)
+    private function color($value, string $name): ?string
     {
-        self::$configurations[$name] = $new_value;
+        if (! $this->isCli)
+        {
+            if ($name == 'type')
+            {
+                return '<small style="color:#' . $this->colors[$name][0] . '">' . $value . '</small>';
+            }
+            elseif ($name == 'array' || $name == 'object')
+            {
+                $value = preg_replace('/(\[|\]|array|object)/', '<b>$0</b>', $value);
+            }
+            return '<span  style="color:#' . $this->colors[$name][0] . '">' . $value . '</span>';
+        }
+        else
+        {
+            return $this->format($value, $this->colors[$name][1]);
+        }
     }
 
     /**
-     * object argument format for cgi
+     * Format the size of array elements or length of string.
      *
-     * @param $objects
+     * @param int $size
+     * @param int $type
      * @return string
      */
-    private function objectsCGI($objects): string
+    private function counter(int $size, int $type = 0): string
     {
-        $obj = new \ReflectionObject($objects);
+        return $this->color('(' . ($type ? 'length' : 'size')  . '=' . $size . ')', 'size');
+    }
 
-        $temp = '<span class="object" style="font-weight:bold;color:#' . $this->_object . '">object -></span>';
-        $format = '<div style="padding-left:20px;" class="obj_prop">';
-        $size = 0;
+    /**
+     * Formats the data type.
+     *
+     * @param string $type
+     * @param string $before
+     * @return string
+     */
+    private function type(string $type, string $before = ' '): string
+    {
+        return $before . $this->color($type, 'type');
+    }
 
-        foreach ($obj->getProperties() as $size => $prop)
+    /**
+     * Move cursor to next line.
+     *
+     * @return string
+     */
+    private function breakLine(): string
+    {
+        return $this->isCli ? PHP_EOL : '<br />';
+    }
+
+    /**
+     * Indents line content.
+     *
+     * @param int $pad
+     * @return string
+     */
+    private function indent(int $pad): string
+    {
+        return str_repeat((! $this->isCli) ? '&nbsp;' : ' ', $pad);
+    }
+
+    /**
+     * Adds padding to the line.
+     *
+     * @param int $size
+     * @return string
+     */
+    private function pad(int $size): string
+    {
+        return str_repeat((! $this->isCli) ? '&nbsp;' : ' ', $size < 0 ? 0 : $size);
+    }
+
+    /**
+     * Formats array index.
+     *
+     * @param $key
+     * @param bool $parent
+     * @return string
+     */
+    private function arrayIndex(string $key, bool $parent = false): string
+    {
+        if (!$parent)
+        {
+            return $this->color("'$key'", 'multi_array_key') . ' ' . $this->color('=', 'multi_array_arrow') . ' ';
+        }
+        else
+        {
+            return $this->color("'$key'", 'single_array_key') . ' ' . $this->color('=>', 'single_array_arrow') . ' ';
+        }
+    }
+
+    /**
+     * Formats array elements.
+     *
+     * @param array $array
+     * @param bool $obj_call
+     * @return string
+     */
+    private function formatArray(array $array, bool $obj_call): string
+    {
+        $tmp = '';
+        $this->indent += $this->pad_size;
+        foreach ($array as $key => $arr)
+        {
+            if (is_array($arr))
+            {
+                $tmp .= $this->breakLine() . $this->indent($this->indent) . $this->arrayIndex((string) $key) . ' ' . $this->counter(count($arr));
+                $new = $this->formatArray($arr, $obj_call);
+                $tmp .=  ($new != '') ? " {{$new}{$this->indent($this->indent)}}" : ' {}';
+            }
+            else
+            {
+                $tmp .= $this->breakLine() . $this->indent($this->indent) . $this->arrayIndex((string) $key, true)
+                    . $this->evaluate([$arr], true);
+            }
+        }
+        $this->indent -= $this->pad_size;
+        if ($tmp != '')
+        {
+            $tmp .= $this->breakLine();
+            if ($obj_call)
+            {
+                $tmp .= $this->indent($this->indent);
+            }
+        }
+
+        return $tmp;
+    }
+
+    /**
+     * Gets the id of an object. (DIRTY)
+     *
+     * @param $object
+     * @return string
+     */
+    private function refcount($object): string
+    {
+        ob_start();
+        debug_zval_dump($object);
+        if (preg_match('/object\(.*?\)#(\d+)\s+\(/', ob_get_clean(), $match))
+        {
+            return $match[1];
+        }
+    }
+
+    /**
+     * Formats object elements.
+     *
+     * @param $object
+     * @return mixed|null|string
+     */
+    private function formatObject($object)
+    {
+        if ($this->aboveNestLevel())
+        {
+            return $this->color('...', 'recursion');
+        }
+
+        $reflection = new ReflectionObject($object);
+        $tmp = '';
+        $this->indent += $this->pad_size;
+        foreach ($reflection->getProperties() as $size => $prop)
         {
             if ($prop->isPrivate())
             {
-                $format .= '<span class="private" style="color:#' . $this->_vsble . '">private&nbsp;&nbsp; </span>';
+                $tmp .= $this->breakLine() . $this->indent($this->indent) . $this->color('private', 'property_visibility')
+                    . $this->pad(2) . ' ' . $this->color(':', 'property_arrow') . ' ';
             }
             elseif ($prop->isProtected())
             {
-                $format .= '<span class="protected" style="color:#' . $this->_vsble . '">protected </span>';
+                $tmp .= $this->breakLine() . $this->indent($this->indent) . $this->color('protected', 'property_visibility') . ' '
+                    . $this->color(':', 'property_arrow') . ' ';
             }
             elseif ($prop->isPublic())
             {
-                $format .= '<span class="public" style="color:#' . $this->_vsble . '">public&nbsp;&nbsp;&nbsp; </span>';
+                $tmp .= $this->breakLine() . $this->indent($this->indent) . $this->color('public', 'property_visibility')
+                    . $this->pad(3) . ' ' . $this->color(':', 'property_arrow') . ' ';
             }
-
-            $format .= '<span class="_obj_prop_name" style="color:#' . $this->_obj_prop_name . '">' . $prop->getName() . '</span>';
-            $format .= '<span class="obj_prop_accessor" style="color:#' . $this->_obj_prop_acc . '"> : </span>';
 
             $prop->setAccessible(true);
-            $format .= $this->formatCGI([$prop->getValue($objects)]);
-            $size++;
+            $tmp .= $this->color('\'' . $prop->getName() . '\'', 'property_name') . ' '
+                . $this->color('=>', 'property_arrow') . ' '
+                . $this->evaluate([$prop->getValue($object)], true, true);
         }
 
-        $name =  '(' . $obj->getName() . ')';
-        $temp .= '<span class="object" style="font-style:italic;color:#' . $this->_object_name . '">' . $name . '</span>';
-        $temp .= '<span class="lenght" style="color:#' . $this->_lenght . '">';
-        $temp .= '(size=' . ($size) . ')</span>';
+        if ($tmp != '')
+        {
+            $tmp .= $this->breakLine();
+        }
 
-        $temp .= $format . '</div>';
-        return $temp;
+        $this->indent -= $this->pad_size;
+        $tmp .= ($tmp != '') ? $this->indent($this->indent) : '';
+
+        $tmp =  str_replace([':name', ':id', ':content'], [
+            $reflection->getName(),
+            $this->color('#' . $this->refcount($object), 'size'),
+            $tmp
+        ], $this->color('object (:name) [:id] [:content]', 'object'));
+
+
+        return $tmp;
     }
 
     /**
-     * object argument format for cli
+     * Couples all formats.
      *
-     * @param $objects
+     * @param array $args
+     * @param bool $called
+     * @param bool $from_obj
      * @return string
      */
-    private function objectsCLI($objects): string
+    private function evaluate(array $args, bool $called = false, bool $from_obj = false): string
     {
-        $obj = new \ReflectionObject($objects);
-
-        $temp = 'object ->';
-        $format = '';
-        $size = 0;
-
-        self::$cli_sub += 3;
-        $padding = str_repeat(' ', self::$cli_sub);
-        foreach ($obj->getProperties() as $size => $prop)
+        $tmp = null;
+        foreach ($args as $each)
         {
-            if ($prop->isPrivate())
+            $type = gettype($each);
+            switch ($type)
             {
-                $format .= $padding . 'private   ';
-            }
-            elseif ($prop->isProtected())
-            {
-                $format .= $padding . 'protected ';
-            }
-            elseif ($prop->isPublic())
-            {
-                $format .= $padding . 'public    ';
+                case 'string':
+                    $tmp .=  $this->color('\'' . $each . '\'', $type) . ' ' . $this->counter(strlen($each), 1) . $this->type($type);
+                    break;
+                case 'integer':
+                    $tmp .=  $this->color((string) $each, $type) . $this->type($type);
+                    break;
+                case 'double':
+                    $tmp .= $this->color((string) $each, $type) . $this->type($type);
+                    break;
+                case 'NULL':
+                    $tmp .= $this->color('null', 'null') . $this->type($type);
+                    break;
+                case 'boolean':
+                    $tmp .= $this->color($each ? 'true' : 'false', $type) . $this->type($type);
+                    break;
+                case 'array':
+                    $tmp .= str_replace([':size', ':content'], [
+                        $this->counter(count($each)),
+                        $this->formatArray($each, $from_obj)
+                    ], $this->color('array :size [:content]', 'array'));
+                    break;
+                case 'object':
+                    $tmp .= $this->formatObject($each);
+                    break;
             }
 
-            $format .= $prop->getName() . ' : ';
-            $prop->setAccessible(true);
-            $format .= $this->formatCLI([$prop->getValue($objects)]);
-            $size++;
+            if (!$called)
+            {
+                $tmp .= $this->breakLine();
+            }
+
         }
-        self::$cli_sub -= 3;
 
-        $name =  '(' . $obj->getName() . ')';
-        $temp .=  $name . ' (size=' . ($size) . ') ' . "\n";
-
-        $temp .= $format . "\n";
-        return $temp;
+        return $tmp;
     }
 
-    /**
-     * formats argument for cgi
-     *
-     * @param array $arguments
-     * @param bool $array_loop
-     * @return string
-     */
-    private function formatCGI(array $arguments, bool $array_loop = false): string
-    {
-        $format = '';
-        foreach ($arguments as $arg)
-        {
-            $type = gettype($arg);
-            if ($type == 'string')
-            {
-                $arg =  htmlspecialchars($arg);
-                $format .= '<span class="string" style="color:#' . $this->_string . '">\'' . $arg . '\'</span>';
-                $format .= '<span class="lenght" style="color:#' . $this->_lenght . '">';
-                $format .= '(length=' . strlen($arg) . ')</span>';
-                $format .= '<span class="type" style="font-size:10px;margin-left:7px;color:#' . $this->_type . '">';
-                $format .= $type . '</span>';
-            }
-            elseif ($type == 'integer')
-            {
-                $format .= '<span class="integer" style="color:#' . $this->_integer . '">' . $arg . '</span>';
-                $format .= '<span class="type" style="font-size:10px;margin-left:7px;color:#' . $this->_type . '">';
-                $format .= $type . '</span>';
-            }
-            elseif ($type == 'boolean')
-            {
-                $arg = ($arg) ? 'true' : 'false';
-                $format .= '<span class="bool" style="color:#' . $this->_bool . '">' . $arg . '</span>';
-                $format .= '<span class="type" style="font-size:10px;margin-left:7px;color:#' . $this->_type . '">';
-                $format .= $type . '</span>';
-            }
-            elseif ($type == 'double')
-            {
-                $format .= '<span class="double" style="color:#' . $this->_double . '">' . $arg . '</span>';
-                $format .= '<span class="type" style="font-size:10px;margin-left:7px;color:#' . $this->_type . '">';
-                $format .= $type . '</span>';
-            }
-            elseif ($type == 'NULL')
-            {
-                $format .= '<span class="null" style="color:#' . $this->_null . '">null</span>';
-                $format .= '<span class="type" style="font-size:10px;margin-left:7px;color:#' . $this->_type . '">';
-                $format .= $type . '</span>';
-            }
-            elseif ($type == 'float')
-            {
-                $format .= '<span class="float" style="color:#' . $this->_float . '">' . $arg . '</span>';
-                $format .= '<span class="type" style="font-size:10px;margin-left:7px;color:#' . $this->_type . '">';
-                $format .= $type . '</span>';
-            }
-            elseif ($type == 'array')
-            {
-                if ( ! $array_loop)
-                {
-                    $format .= '<span class="string" style="font-weight:bold;color:#' . $this->_array . '">array</span>';
-                    $format .= '<span class="lenght" style="margin:0 5px;color:#' . $this->_lenght . '">';
-                    $format .= '(size=' . count($arg) . ')</span>';
-                    $format .= '<span class="string" style="font-weight:bold;color:#' . $this->_array . '">[</span>';
-                    $format .= '<div class="arr_content" style="padding-left:20px;">';
-                }
-
-                foreach ($arg as $key => $value)
-                {
-                    $key = htmlspecialchars($key);
-                    if ( is_array($value))
-                    {
-                        $format .= '<span class="string" style="color:#' . $this->_parent_arr . '">\'' . $key . '\'</span>';
-                        $format .= '<span class="string" style="color:#' . $this->_parent_arr_acc . '"> = </span>';
-
-                        $format .= '<span class="string" style="font-weight:bold;color:#' . $this->_array . '">array</span>';
-                        $format .= '<span class="lenght" style="margin:0 5px;color:#' . $this->_lenght . '">';
-                        $format .= '(size=' . count($value) . ')</span>';
-                        $format .= '<span class="string" style="color:#' . $this->_array . '">{</span>';
-                        $format .= '<div class="arr_content" style="padding-left:20px;">';
-
-                        $format .= $this->formatCGI([$value], true);
-
-                        $format .= '</div>';
-                        $format .= '<span class="string" style="color:#' . $this->_array . '">}</span><br />';
-                    }
-                    else
-                    {
-                        $format .= '<span class="string" style="color:#' . $this->_child_arr . '">\'' . $key . '\'</span>';
-                        $format .= '<span class="string" style="color:#' . $this->_child_arr_acc . '"> => </span>';
-                        $format .= $this->formatCGI([$value], true);
-                        $format .= '<br />';
-                    }
-                }
-
-                if ( ! $array_loop)
-                {
-                    $format .= '</div>';
-                    $format .= '<span class="string" style="font-weight:bold;color:#' . $this->_array . '">]</span>';
-                }
-            }
-            elseif ($type == 'object')
-            {
-                $format .= $this->objectsCGI($arg);
-            }
-
-            if ( ! $array_loop)
-            {
-                $format .= '<br />';
-            }
-        }
-        return str_replace(['<br /></div><br />', '  '], ['<br /></div>', '&nbsp;&nbsp;'], nl2br($format));
-    }
-
-    /**
-     * formats argument for cli
-     *
-     * @param array $arguments
-     * @param bool $array_loop
-     * @return string
-     */
-    private function formatCLI(array $arguments, bool $array_loop = false): string
-    {
-        $format = '';
-        $nl = "\n";
-        foreach ($arguments as $arg)
-        {
-            $type = gettype($arg);
-            if ($type == 'string')
-            {
-                $format .= '\'' . $arg . '\' (length=' . strlen($arg) . ') string';
-            }
-            elseif ($type == 'integer')
-            {
-                $format .= $arg . ' int';
-            }
-            elseif ($type == 'boolean')
-            {
-                $arg = ($arg) ? 'true' : 'false';
-                $format .=  $arg . ' bool   ';
-            }
-            elseif ($type == 'double')
-            {
-                $format .= $arg . ' double   ';
-            }
-            elseif ($type == 'NULL')
-            {
-                $format .= 'null NULL';
-            }
-            elseif ($type == 'float')
-            {
-                $format .= $arg . ' float';
-            }
-            elseif ($type == 'array')
-            {
-                if ( ! $array_loop)
-                {
-                    $format .= 'array (size=' . count($arg) . ') [' . $nl;
-                }
-
-                self::$cli_sub += 3;
-                $padding = str_repeat(' ', self::$cli_sub);
-                foreach ($arg as $key => $value)
-                {
-                    if ( is_array($value))
-                    {
-                        $format .= $padding . '\'' . $key . '\' = array (size=' . count($value) . ') {' . $nl;
-                        $format .= $this->formatCLI([$value], true);
-                        $format .= $padding . '}' . $nl;
-                    }
-                    else
-                    {
-                        $format .=  $padding . '\'' . $key . '\' => ' . $this->formatCLI([$value], true) . $nl;
-                    }
-                }
-                self::$cli_sub -= 3;
-
-                if ( ! $array_loop)
-                {
-                    $format .= str_repeat(' ', self::$cli_sub) . ']';
-                }
-            }
-            elseif ($type == 'object')
-            {
-                $format .= $this->objectsCLI($arg);
-            }
-
-            if ( ! $array_loop)
-            {
-                $format .= $nl;
-            }
-        }
-        return $format;
-    }
 }

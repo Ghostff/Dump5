@@ -63,14 +63,33 @@ new Dump5(1 == '1', 1 === '1');
 ```
 Replacing predefined colors:
 ```php
-Dump5::set('bool', 'F00');
+# set($name, [$cgi_color, $cli_color]);
+Dump::set('boolean', ['bb02ff', 'purple']);
 new Dump5(false, true);
 ```
 CGI output:    
 
-![cgi screenshot](https://github.com/Ghostff/pretty_data_dump/blob/master/cgi.png)
+![cgi screenshot](cgi.png)
 
-CLI output:     
+CLI Posix output:     
     
-![cli screenshot](https://github.com/Ghostff/pretty_data_dump/blob/master/cli.png)
+![cli screenshot](posix.png)
+
+Windows user who are using command line tools like `cmder` can use the `Dump::d` method:
+```php
+Dump::d(new Foo, $string, $array, $int, $double, $null, $bool, [
+    'foo' => 'bar',
+    'bar' => 'foo',
+    [
+        'foo' => 'foobar',
+        'bar_foo',
+        2 => 'foo',
+        'foo' => [
+            'barbar' => 55,
+            'foofoo' => false,
+            'foobar' => null,
+        ]
+    ]
+]);
+```
 
