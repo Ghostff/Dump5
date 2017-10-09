@@ -14,9 +14,8 @@
 		"php": ">=5.3"	
 	},
 	"autoload" : {
-		"psr-4" : {
-		  	"Dump7\\" : "src/PHP7/",
-		  	"Dump5\\" : "src/PHP5/"
-		}
+        "psr-4" : {
+            "Dump\\" : "src/"
+        }
     }
 }
