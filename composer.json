@@ -1,5 +1,5 @@
 {
-    "name": "ghostff/pretty_data_dump",
+    "name": "ghostff/dump5",
     "description": "A pretty version of php var_dump. This class displays structured information about one or more expressions that includes its type and value.",
     "type": "library",
     "keywords" : ["debuger", "var_dump", "data_dump"],
@@ -14,9 +14,8 @@
 		"php": ">=5.3"	
 	},
 	"autoload" : {
-		"psr-4" : {
-		  	"Dump7\\" : "src/PHP7/",
-		  	"Dump5\\" : "src/PHP5/"
-		}
+        "psr-4" : {
+            "Dump\\" : "src/"
+        }
     }
 }
