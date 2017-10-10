@@ -477,7 +477,7 @@ class Dump
             return $this->color('...', 'recursion');
         }
 
-        $reflection = new ReflectionObject($object);
+        $reflection = new \ReflectionObject($object);
         $tmp = '';
         $this->indent += $this->pad_size;
         foreach ($reflection->getProperties() as $size => $prop)
