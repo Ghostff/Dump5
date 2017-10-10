@@ -37,6 +37,9 @@
  *
  */
 
+namespace Dump;
+
+
 class Dump
 {
     protected $isCli = false;
