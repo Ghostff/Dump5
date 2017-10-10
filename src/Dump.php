@@ -127,25 +127,11 @@ class Dump
     );
 
     /**
-     * Styles map
-     * @var array
-     */
-    private $styles = array(
-        'none'      => null,
-        'bold'      => 1,
-        'faint'     => 2,
-        'italic'    => 3,
-        'underline' => 4,
-        'blink'     => 5,
-        'negative'  => 7,
-    );
-
-    /**
      * Dump constructor.
      */
     public function __construct()
     {
-        if (substr(PHP_SAPI, 0, 3) == 'cgi')
+        if (substr(PHP_SAPI, 0, 3) == 'cli')
         {
             $this->isCli = true;
             $this->setOutputStream(STDIN);
@@ -160,7 +146,7 @@ class Dump
     public static function d()
     {
         self::$force_posix = true;
-        new static(func_get_args());
+        call_user_func_array(array(new static, '__construct'), func_get_args());
     }
 
     /**
@@ -169,7 +155,7 @@ class Dump
      * @param string $name
      * @param array $value
      */
-    public static function set(string $name, array $value)
+    public static function set($name, array $value)
     {
         self::$changes[$name] = $value;
     }
@@ -262,11 +248,16 @@ class Dump
 
         $format = $format ? explode('|', $format) : array();
 
-        $code = array_filter(array(
-            $this->backgrounds[$format[1] ?: null] ?: null,
-            $this->styles[$format[2] ?: null] ?: null,
-            $this->foregrounds[$format[0] ?: null] ?: null,
-        ));
+        $tmp = isset($format[1]) ? $format[1] : null;
+        $bg1 = isset($this->backgrounds[$tmp]) ? $this->backgrounds[$tmp] : null;
+
+        $tmp = isset($format[2]) ? $format[2] : null;
+        $bg2 = isset($this->styles[$tmp]) ? $this->styles[$tmp] : null;
+
+        $tmp = isset($format[0]) ? $format[0] : null;
+        $bg3 = isset($this->foregrounds[$tmp]) ? $this->foregrounds[$tmp] : null;
+
+        $code = array_filter(array($bg1, $bg2, $bg3));
 
         $code = implode(';', $code);
 
@@ -277,11 +268,10 @@ class Dump
      * Writes dump to console.
      *
      * @param $message
-     * @param null $format
      */
-    public function write($message, $format = null)
+    public function write($message)
     {
-        fwrite($this->output, $this->format($message, $format));
+        echo $this->format($message);
     }
 
     /**
