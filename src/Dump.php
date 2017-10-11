@@ -37,8 +37,6 @@
  *
  */
 
-namespace Dump;
-
 
 class Dump
 {
