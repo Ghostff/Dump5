@@ -355,7 +355,7 @@ class Dump
      */
     private function type($type, $before = ' ')
     {
-        return $before . $this->color($type, 'type');
+        return "{$before}{$this->color($type, 'type')}";
     }
 
     /**
