@@ -56,11 +56,11 @@ Dump::set('boolean', ['bb02ff', 'purple']);
 ```
 CGI output:    
 
-![cgi screenshot](cgi.png)
+![cgi screenshot](https://github.com/Ghostff/Dump5/blob/master/cgi.png)
 
 CLI Posix output:     
     
-![cli screenshot](posix.png)
+![cli screenshot](https://github.com/Ghostff/Dump5/blob/master/posix.png)
 
 Windows user who are using command line tools like `cmder` can use the `Dump::d` method:
 ```php
@@ -81,5 +81,5 @@ Dump::d(new Foo, $string, $array, $int, $double, $null, $bool, array(
 ```
 CLI Windows output:
 
-![cli screenshot](posixWin.png)
+![cli screenshot](https://github.com/Ghostff/Dump5/blob/master/posixWin.png)
 

@@ -3,7 +3,7 @@
     "description": "A pretty version of php var_dump. This class displays structured information about one or more expressions that includes its type and value.",
     "type": "library",
     "keywords" : ["debuger", "var_dump", "data_dump"],
-    "license": "BSD",
+    "license": "BSD-3-Clause",
     "authors": [
         {
             "name": "Chrys Ugwu",

@@ -399,7 +399,7 @@ class Dump
      */
     private function arrayIndex($key, $parent = false)
     {
-        if (!$parent)
+        if (! $parent)
         {
             return $this->color("'$key'", 'multi_array_key') . " {$this->color('=', 'multi_array_arrow')} ";
         }
