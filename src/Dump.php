@@ -50,15 +50,13 @@ class Dump
 
     private $isPosix = false;
 
-    private $output = null;
-
     private $colors = array(
         'string'                => array('0000FF', 'blue'),
         'integer'               => array('1BAABB', 'light_green'),
         'double'                => array('9C6E25', 'cyan'),
         'boolean'               => array('bb02ff', 'purple'),
         'null'                  => array('6789f8', 'white'),
-        'type'                  => array('AAAAAA', 'light_gray'),
+        'type'                  => array('AAAAAA', 'dark_gray'),
         'size'                  => array('5BA415', 'green'),
         'recursion'             => array('F00000', 'red'),
         'resource'              => array('F00000', 'red'),
@@ -76,7 +74,7 @@ class Dump
 
     );
 
-    private static $force_posix = false;
+    private static $safe = false;
 
     private static $changes = array();
 
@@ -129,14 +127,29 @@ class Dump
     );
 
     /**
+     * Styles map
+     *
+     * @var array
+     */
+    private $styles = array(
+        'none'      => null,
+        'bold'      => 1,
+        'faint'     => 2,
+        'italic'    => 3,
+        'underline' => 4,
+        'blink'     => 5,
+        'negative'  => 7,
+    );
+
+    /**
      * Dump constructor.
      */
     public function __construct()
     {
         if (substr(PHP_SAPI, 0, 3) == 'cli')
         {
-            $this->isCli = true;
-            $this->setOutputStream(STDIN);
+            $this->isCli   = true;
+            $this->isPosix = $this->isPosix();
         }
         $this->colors = static::$changes + $this->colors;
         $this->output($this->evaluate(func_get_args()));
@@ -145,9 +158,9 @@ class Dump
     /**
      * Force debug to use posix, (For window users who are using tools like http://cmder.net/)
      */
-    public static function d()
+    public static function safe()
     {
-        self::$force_posix = true;
+        self::$safe = true;
         call_user_func_array(array(new static, '__construct'), func_get_args());
     }
 
@@ -189,16 +202,11 @@ class Dump
      * Check if a resource is an interactive terminal
      *
      * @see https://github.com/auraphp/Aura.Cli/blob/2.x/src/Stdio/Handle.php#L117
-     * @param  resource  $resource
      * @return bool
      */
-    private function isPosix($resource)
+    private function isPosix()
     {
-        if (self::$force_posix) {
-            return true;
-        }
-        // Windows
-        if ($this->isWindows())
+        if (self::$safe)
         {
             return false;
         }
@@ -207,30 +215,12 @@ class Dump
         if (function_exists('posix_isatty'))
         {
             set_error_handler(function () {});
-            $isPosix = posix_isatty($resource);
+            $isPosix = posix_isatty(STDIN);
             restore_error_handler();
             return $isPosix;
         }
 
-        return false;
-    }
-
-    /**
-     * Sets output stream to write to
-     *
-     * @param $resource
-     * @throws Exception
-     */
-    public function setOutputStream($resource)
-    {
-        if (! is_resource($resource))
-        {
-            throw new Exception('Invalid resource');
-        }
-
-        // Detect posix terminal
-        $this->isPosix = $this->isPosix($resource);
-        $this->output = $resource;
+        return true;
     }
 
     /**
@@ -248,15 +238,15 @@ class Dump
             return $string;
         }
 
-        $format = $format ? explode('|', $format) : array();
+        $formats = $format ? explode('|', $format) : array();
 
-        $tmp = isset($format[1]) ? $format[1] : null;
+        $tmp = isset($formats[1]) ? $formats[1] : null;
         $bg1 = isset($this->backgrounds[$tmp]) ? $this->backgrounds[$tmp] : null;
 
-        $tmp = isset($format[2]) ? $format[2] : null;
+        $tmp = isset($formats[2]) ? $formats[2] : null;
         $bg2 = isset($this->styles[$tmp]) ? $this->styles[$tmp] : null;
 
-        $tmp = isset($format[0]) ? $format[0] : null;
+        $tmp = isset($formats[0]) ? $formats[0] : null;
         $bg3 = isset($this->foregrounds[$tmp]) ? $this->foregrounds[$tmp] : null;
 
         $code = array_filter(array($bg1, $bg2, $bg3));
@@ -336,18 +326,6 @@ class Dump
     }
 
     /**
-     * Format the size of array elements or length of string.
-     *
-     * @param int $size
-     * @param int $type
-     * @return string
-     */
-    private function counter($size, $type = 0)
-    {
-        return $this->color('(' . ($type ? 'length' : 'size')  . "={$size})", 'size');
-    }
-
-    /**
      * Formats the data type.
      *
      * @param string $type
@@ -422,13 +400,13 @@ class Dump
         {
             if (is_array($arr))
             {
-                $tmp .= "{$break_line}{$indent}{$this->arrayIndex((string) $key)} {$this->counter(count($arr))}";
+                $tmp .= "{$break_line}{$indent}{$this->arrayIndex((string) $key)} {$this->color('(size=' . count($arr) . ')', 'size')}";
                 $new = $this->formatArray($arr, $obj_call);
                 $tmp .= ($new != '') ? " {{$new}{$indent}}" : ' {}';
             }
             else
             {
-                $tmp .= "{$break_line}{$indent}{$this->arrayIndex((string) $key, true)}{$this->evaluate([$arr], true)}";
+                $tmp .= "{$break_line}{$indent}{$this->arrayIndex((string) $key, true)}{$this->evaluate(array($arr), true)}";
             }
         }
 
@@ -575,21 +553,21 @@ class Dump
                         $each = nl2br(str_replace(array('<', ' '), array('&lt;', '&nbsp;'), $each));
                     }
 
-                    $tmp .= "{$this->color("'{$each}'", $type)}{$this->counter(strlen($each), 1)}{$this->type($type)}";
+                    $tmp .= "{$this->type("{$type}:" . strlen($each))} {$this->color("'{$each}'", $type)}";
                     break;
                 case 'integer':
                 case 'double':
-                    $tmp .=  "{$this->color((string) $each, $type)}{$this->type($type)}";
+                    $tmp .=  "{$this->type($type)} {$this->color((string) $each, $type)}";
                     break;
                 case 'NULL':
-                    $tmp .= "{$null_color}{$this->type($type)}";
+                    $tmp .= "{$this->type($type)} {$null_color}";
                     break;
                 case 'boolean':
-                    $tmp .= "{$this->color($each ? 'true' : 'false', $type)}{$this->type($type)}";
+                    $tmp .= "{$this->type($type)} {$this->color($each ? 'true' : 'false', $type)}";
                     break;
                 case 'array':
                     $tmp .= str_replace(array(':size', ':content'), array(
-                        $this->counter(count($each)),
+                        $this->color('(size=' . count($each) . ')', 'size'),
                         $this->formatArray($each, $from_obj)
                     ), $this->color('array :size [:content]', $type));
                     break;
