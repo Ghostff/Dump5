@@ -1,7 +1,7 @@
 # Pretty Data Dump
 A pretty version of php [var_dump](http://php.net/manual/en/function.var-dump.php). This class displays structured information about one or more expressions that includes its type and value.
 
-_Check out [Dump5](https://github.com/Ghostff/Dump5) for PHP 5+_
+_Check out [Dump7](https://github.com/Ghostff/Dump7) for PHP 7+_
 
 # Installation   
 You can download the  Latest [release version ](https://github.com/Ghostff/pretty_data_dump/releases/) as a standalone, alternatively you can use [Composer](https://getcomposer.org/) 
@@ -10,7 +10,7 @@ $ composer require ghostff/dump7
 ```
 ```json
 "require": {
-    "ghostff/dump7": "^1.0"
+    "ghostff/dump5": "^1.0"
 }
 ```    
 # Display Flags
