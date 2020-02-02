@@ -6,7 +6,7 @@ _Check out [Dump7](https://github.com/Ghostff/Dump7) for PHP 7+_
 # Installation   
 You can download the  Latest [release version ](https://github.com/Ghostff/pretty_data_dump/releases/) as a standalone, alternatively you can use [Composer](https://getcomposer.org/) 
 ```json
-$ composer require ghostff/dump7
+$ composer require ghostff/dump5
 ```
 ```json
 "require": {
