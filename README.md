@@ -34,7 +34,7 @@ You can simple hide or show some object attribute using a Doc block flag:
 */
 Class Foo extends Bar {
     /** @dumpignore */
-    private ?BigObject $foo = null;
+    public $big_object = null;
 }
 ```
 
@@ -42,21 +42,21 @@ Class Foo extends Bar {
 ```php
 class FooBar
 {
-    private $inherited_int = 123;
-    private $inherited_bool = array('string');
+    private $inherited_int   = 123;
+    private $inherited_array = array('string');
 }
 
 class Bar extends FooBar
 {
     private $inherited_float = 0.22;
-    private $inherited_bool = true;
+    private $inherited_bool  = true;
 }
 
 class Foo extends Bar
 {
     private $string = 'string';
-    protected $int = 10;
-    public $array = array(
+    protected $int  = 10;
+    public $array   = array(
         'foo'   => 'bar'
     );
     protected static $bool = false;
