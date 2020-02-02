@@ -453,24 +453,34 @@ class Dump
         }
 
         $reflection   = new \ReflectionObject($object);
-        $parent       = $reflection->getParentClass();
-        $properties   = $reflection->getProperties();
-        $inherited    = array_fill(0, count($properties), null);
+        $class_name   = $reflection->getName();
+        $properties   = array();
+        $tmp          = '';
+        $inherited    = array();
         $max_indent   = 0;
-        $name         = null;
-        $props        = null;
+        $comments     = '';
 
-        while ($parent)
+        while ($reflection)
         {
-            $props      = $parent->getProperties();
-            $name       = $parent->getName();
-            $properties = array_merge($properties, $props);
-            $inherited  = array_merge($inherited, array_fill(count($inherited), count($props), $name));
-            $parent     = $parent->getParentClass();
-            $max_indent = max($max_indent, strlen($name));
+            $tmp_class_name = $reflection->getName();
+            $max_indent     = max($max_indent, strlen($tmp_class_name));
+            $comments      .= $reflection->getDocComment() ?: '';
+
+            foreach($reflection->getProperties() as $prop)
+            {
+                $prop_name              = $prop->getName();
+                $properties[$prop_name] = $prop;
+                $inherited[$prop_name]  = $tmp_class_name == $class_name ? null : $tmp_class_name;
+            }
+
+            if (strpos($comments, '@dumpignore-inheritance') !== false)
+            {
+                break;
+            }
+
+            $reflection = $reflection->getParentClass();
         }
 
-        $tmp             = '';
         $indent          = $this->indent($this->indent += $this->pad_size);
         $private_color   = $this->color('private', 'property_visibility');
         $protected_color = $this->color('protected', 'property_visibility');
@@ -480,35 +490,57 @@ class Dump
         $string_pad_2    = $this->pad(2);
         $string_pad_3    = $this->pad(3);
         $line_break      = $this->breakLine();
+        $hide_private    = strpos($comments, '@dumpignore-private') !== false;
+        $hide_protected  = strpos($comments, '@dumpignore-protected') !== false;
+        $hide_public     = strpos($comments, '@dumpignore-public') !== false;
+        $hide_in_class   = strpos($comments, '@dumpignore-inherited-class') !== false;
 
-        foreach ($properties as $size => $prop)
+        foreach ($properties as $name => $prop)
         {
-            if (isset($inherited[$size]))
+            $prop_comment = $prop->getDocComment();
+            if ($prop_comment && (strpos($prop_comment, '@dumpignore') !== false))
             {
-                $name = $inherited[$size];
+                continue;
+            }
+
+            $from = '';
+            if (! $hide_in_class && isset($inherited[$name]))
+            {
+                $name = $inherited[$name];
                 $from = $this->color("[{$name}]", 'property_arrow');
                 $from .= $this->indent($max_indent - strlen($name));
-            }
-            else
-            {
-                $from = $max_indent > 0 ? $this->indent($max_indent + 2) : '';
             }
 
             if ($prop->isPrivate())
             {
+                if ($hide_private)
+                {
+                    continue;
+                }
+
                 $tmp .= "{$line_break}{$indent}{$private_color}{$string_pad_2} {$property_color} ";
             }
             elseif ($prop->isProtected())
             {
+                if ($hide_protected)
+                {
+                    continue;
+                }
+
                 $tmp .= "{$line_break}{$indent}{$protected_color} {$property_color} ";
             }
             elseif ($prop->isPublic())
             {
+                if ($hide_public)
+                {
+                    continue;
+                }
+
                 $tmp .= "{$line_break}{$indent}{$public_color}{$string_pad_3} {$property_color} ";
             }
 
             $prop->setAccessible(true);
-            $new_obj = $prop->getValue($reflection->newInstanceWithoutConstructor());
+            $new_obj = $prop->getValue($object);
             $tmp .= "{$from} {$this->color("'{$prop->getName()}'", 'property_name')} {$arrow_color} {$this->evaluate(array($new_obj), true, true)}";
         }
 
@@ -521,7 +553,7 @@ class Dump
         $tmp .= ($tmp != '') ? $this->indent($this->indent) : '';
 
         $tmp =  str_replace(array(':name', ':id', ':content'), array(
-            $reflection->getName(),
+            $class_name,
             $this->color("#{$this->refcount($object)}", 'size'),
             $tmp
         ), $this->color('object (:name) [:id] [:content]', 'object'));
