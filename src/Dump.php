@@ -55,6 +55,7 @@ class Dump
         'integer'               => array('1BAABB', 'light_green'),
         'double'                => array('9C6E25', 'cyan'),
         'boolean'               => array('bb02ff', 'purple'),
+        'keyword'               => array('bb02ff', 'purple'),
         'null'                  => array('6789f8', 'white'),
         'type'                  => array('AAAAAA', 'dark_gray'),
         'size'                  => array('5BA415', 'green'),
@@ -295,7 +296,7 @@ class Dump
         }
         else
         {
-            echo '<code><small>' . $file . '</small><br />' . $data . '</code>';
+            echo sprintf("<code><small>%s</small><br />%s</code>", $file, $data);
         }
     }
 
@@ -315,14 +316,14 @@ class Dump
 
         if ($name == 'type')
         {
-            return '<small style="color:#' . $this->colors[$name][0] . '">' . $value . '</small>';
+            return "<small style=\"color:#{$this->colors[$name][0]}\">{$value}</small>";
         }
         elseif ($name == 'array' || $name == 'object')
         {
             $value = preg_replace('/(\[|\]|array|object)/', '<b>$0</b>', $value);
         }
 
-        return '<span  style="color:#' . $this->colors[$name][0] . '">' . $value . '</span>';
+        return "<span  style=\"color:#{$this->colors[$name][0]}\">{$value}</span>";
     }
 
     /**
@@ -332,7 +333,7 @@ class Dump
      * @param string $before
      * @return string
      */
-    private function type($type, $before = ' ')
+    private function type($type, $before = '')
     {
         return "{$before}{$this->color($type, 'type')}";
     }
@@ -540,13 +541,13 @@ class Dump
             }
 
             $prop->setAccessible(true);
-            if ($prop->isInitialized($object))
+            if (version_compare(PHP_VERSION, '7.4.0') >= 0)
             {
-                $value = $this->evaluate(array($prop->getValue($object)), true, true);
+                $value = $prop->isInitialized($object) ? $this->getValue($prop, $object, $class_name) : $this->type('uninitialized');
             }
             else
             {
-                $value = $this->type('uninitialized');
+                $value = $this->getValue($prop, $object, $class_name);
             }
 
             $tmp .= "{$from} {$this->color("'{$prop->getName()}'", 'property_name')} {$arrow_color} {$value}";
@@ -567,6 +568,27 @@ class Dump
         ), $this->color('object (:name) [:id] [:content]', 'object'));
 
         return $tmp;
+    }
+
+    /**
+     * Formats object property values.
+     *
+     * @param \ReflectionProperty $property
+     * @param                     $object
+     * @param string              $class_name
+     *
+     * @return string
+     */
+    private function getValue(ReflectionProperty $property, $object, $class_name)
+    {
+        $value = $property->getValue($object);
+        # Prevent infinite loop caused by nested object property. e.g. when an object property is pointing to the same
+        # object.
+        if (is_object($value) && $value instanceof $object && $value == $object) {
+            return "{$this->type($class_name)} {$this->color('::self', 'keyword')}";
+        }
+
+        return $this->evaluate(array($value), true, true);
     }
 
     /**
